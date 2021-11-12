@@ -1,0 +1,164 @@
+.highlight {
+  font-weight: bold;
+  color: red;
+}
+
+#reportlanguage,
+#stopsearch {
+  /*width: 48px; */
+  height: 25px;
+  padding-top: 5px;
+}
+
+.languagebox {
+  /* width: 50px; */
+  height: 25px;
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  float: left;
+}
+
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.uilistinginfo {
+  border: 1px solid red;
+  width: 147px;
+  padding: 2px 5px;
+  position: absolute;
+  top: 0px;
+  left: 770px;
+}
+
+.mapView {
+  border: 1px solid red;
+  width: 500px;
+  height: 720px;
+  padding: 0px 0px;
+  position: absolute;
+  top: 0px;
+  left: 920px;
+}
+
+.mapBox {
+  width: 498px;
+  height: 680px;
+}
+
+.mapView__large {
+  width: 1000px;
+  height: 820px;
+}
+
+.mapBox__large {
+  width: 990px;
+  height: 720px;
+}
+
+.roadMapType {
+  width: 29px;
+  height: 28px;
+  background-position: -128px -1920px !important; //x larger -> move right, y larger -> move up
+  background-color: grey;
+}
+
+.aerialMapType {
+  width: 29px;
+  height: 28px;
+  background-position: -15px -12px !important; //x larger -> move right, y larger -> move up
+  background-color: grey;
+}
+
+.changeSizeButton {
+  top: 2px;
+  width: 29px;
+  height: 29px;
+  color: darkblue;
+  background-color: buttonface;
+}
+
+.picContainer {
+  border: 1px solid red;
+  width: 515px;
+  height: 840px;
+  padding: 5px 5px;
+  position: absolute;
+  top: 0px;
+  left: 1425px;
+  z-index: -10;
+}
+
+.picBox {
+  padding: 1px 3px;
+  width: 158px;
+  height: 118px;
+}
+
+.picHidden {
+  display: none;
+}
+
+.inputbox {
+  width: 120px;
+}
+
+.bottomline {
+  border-bottom: 1px dotted darkblue;
+  padding-bottom: 2px;
+  margin-bottom: 2px;
+  color: grey;
+}
+
+.inputHighlight {
+  color: rgb(0, 123, 255) !important;
+  font-weight: bold !important;
+}
+
+.flex-container {
+  display: flex;
+  background-color: DodgerBlue;
+}
+
+.flex-container > div {
+  background-color: #f1f1f1;
+  margin: 0 1px;
+  padding: 0;
+}
+
+.flex-container > div > div{
+  background-color: #f1f1f1;
+  margin: 0 2px;
+  padding: 0;
+}
+
+.mls-hr{
+  border: 0;
+  clear:both;
+  display:block;
+  width: 96%;               
+  background-color: grey;
+  height: 1px;
+}
+
+.mls-highlighted{
+  font-weight: bold;
+}
+
+.map-image-border{
+  border: 1px solid #C1E0FF; 
+}
+
+.mls-color-red{
+  color: red !important;
+  text-decoration: underline;
+}
+
+.mls-color-red-2{
+  color: red !important;
+  text-decoration: underline;
+}
+

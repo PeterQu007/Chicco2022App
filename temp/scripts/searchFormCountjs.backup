@@ -1,0 +1,57 @@
+        searchFormCount: async function (i) {
+            var r, u;
+            if (n.focusFx.processingAutocomplete) {
+                r = function () {
+                    this.searchFormCount(i)
+                };
+                t(r);
+                return
+            }
+            if (!n.focusFx.hasRequiredFields(!i)) {
+                if (i === !0 && (u = n.focusFx.hasRealCriteria(),
+                        !u)) {
+                    n(".CountBtn,.SearchBtn,.ClearBtn").removeAttr("disabled");
+                    n.focusFx.setCount("");
+                    window.g_isMapSearchOnInit && (window.g_isMapSearchOnInit = !1,
+                        n.focusFx.bingSearch());
+                    n.focusFx.triggerSave();
+                    return Promise.reject('error');
+                }
+                i === !0 ? n(".CountBtn,.ClearBtn").attr("disabled", "disabled") : n(".CountBtn,.SearchBtn,.ClearBtn").attr("disabled", "disabled");
+                n(".CountResultText").val("Counting...");
+                n("form.f-form-search").ajaxSubmit({
+                    url: g_urlCountAction,
+                    dataType: "json",
+                    headers: {
+                        __RequestVerificationToken: n('input[name="__RequestVerificationToken"]').val()
+                    },
+                    type: "POST",
+                    timeout: 12e4,
+                    success: async function (t) {
+                        var r = typeof t.result == "object" ? t.result.Count : t.result;
+                        if (t.status == "OK") {
+                            if (n.focusFx.setCount(r),
+                                n.focusFx.countQueued) {
+                                n.focusFx.countQueued = !1;
+                                n.focusFx.searchFormCount(i);
+                                return Promise.resolve(r);
+                            }
+                            window.g_isMapSearchOnInit && (window.g_isMapSearchOnInit = !1,
+                                n.focusFx.bingSearch())
+                        } else
+                            n(".CountResultText").val("Error."),
+                            n.jGrowl(r, {
+                                header: "ALERT",
+                                group: "jgrowl-alert"
+                            });
+                        n(".CountBtn,.SearchBtn,.ClearBtn").removeAttr("disabled")
+                        return Promise.resolve(r);
+                    },
+                    error: function () {
+                        n(".CountResultText").val("Error.");
+                        n(".CountBtn,.SearchBtn,.ClearBtn").removeAttr("disabled")
+                    }
+                })
+            }
+            n.focusFx.triggerSave()
+        },

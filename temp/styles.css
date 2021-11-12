@@ -1,0 +1,20 @@
+.currentRow {
+  color: red !important;
+}
+
+.hideMenuContent {
+  display: none;
+}
+
+.showMenuContent {
+  display: block;
+}
+
+.uilistinginfo {
+  border: 1px solid rgb(61, 6, 189);
+  width: 147px;
+  padding: 5px 10px;
+  position: absolute;
+  top: 150px;
+  left: 100px;
+}
