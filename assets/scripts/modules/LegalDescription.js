@@ -58,5 +58,3 @@ class LegalDescription {
     this.strataPlan1 = "strata plan not found";
   }
 }
-
-export default LegalDescription;

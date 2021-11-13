@@ -8,10 +8,9 @@
 
 "use strict";
 
-import legalDescription from "../assets/scripts/modules/LegalDescription";
-import addressInfo from "../assets/scripts/modules/AddressInfo";
-import uiListingInfo from "../assets/scripts/ui/uiListingInfo";
-//import { mainNavItem } from '../assets/scripts/modules/MainNavBar';
+// import legalDescription from "../assets/scripts/modules/LegalDescription";
+// import addressInfo from "../assets/scripts/modules/AddressInfo";
+// import uiListingInfo from "../assets/scripts/ui/uiListingInfo";
 
 //var curTabID = null;
 var $fx = L$();
@@ -102,15 +101,13 @@ var fullRealtor = {
         cboxWrapper.style.width = "975px";
         var cboxTopCenter = parent.document.getElementById("cboxTopCenter");
         cboxTopCenter.style.width = "930px";
-        var cboxBottomCenter = parent.document.getElementById(
-          "cboxBottomCenter"
-        );
+        var cboxBottomCenter =
+          parent.document.getElementById("cboxBottomCenter");
         cboxBottomCenter.style.width = "930px";
         var cboxTopCenter = parent.document.getElementById("cboxContent");
         cboxTopCenter.style.width = "930px";
-        var cboxBottomCenter = parent.document.getElementById(
-          "cboxLoadedContent"
-        );
+        var cboxBottomCenter =
+          parent.document.getElementById("cboxLoadedContent");
         cboxBottomCenter.style.width = "930px";
       } catch (err) {
         console.log("ReShape the display box failed!", err);
@@ -155,7 +152,7 @@ var fullRealtor = {
     //this.lockVisibility();
   },
 
-  uiListingInfo: new uiListingInfo(),
+  uiListingInfo: new UIListingInfo(),
   listingID: "",
   //elements on the page
   houseType: $('div[style="top:32px;left:46px;width:61px;height:14px;"]'),
@@ -475,7 +472,7 @@ var fullRealtor = {
       legal = planNum.toString();
     }
 
-    var legalDesc = (this.legalDesc = new legalDescription(legal));
+    var legalDesc = (this.legalDesc = new LegalDescription(legal));
     var complexName = this.complexOrSubdivision.text();
     this.strataPlan = legalDesc.strataPlan1; //set up the strata Plan number
 
@@ -531,7 +528,7 @@ var fullRealtor = {
       addressSelect = self.address.text();
       isFormalAddress = false;
     }
-    var address = new addressInfo(
+    var address = new AddressInfo(
       addressSelect,
       this.houseListingType,
       isFormalAddress
@@ -1024,7 +1021,7 @@ var fullRealtor = {
               "Google tutorial create link" +
               "</a> "
           );
-          var adrInfo = new addressInfo(formalAddress, "auto", true);
+          var adrInfo = new AddressInfo(formalAddress, "auto", true);
           adrLink.attr("href", adrInfo.googleSearchLink);
           adrLink.text(adrInfo.formalAddress);
           adrLink.appendTo(self.formalAddress);

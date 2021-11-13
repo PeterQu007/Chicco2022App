@@ -23,12 +23,15 @@ class MainMenu {
 
     //insert remote/local radio
     this.radioSubjectLoadingLink = $(`<div class = "languagebox">
+        <span class="mls-vertial-divider">|</span>
         <input type="radio" class = "pid_subject_property_options" id='pid_local' name="LoadSubjects" value="local" checked='checked' />
         <label for='pid_local'>Local&nbsp</label>
         <input type="radio" class = "pid_subject_property_options" id='pid_remote; ?>' name="LoadSubjects" value="remote" />
         <label for='pid_remote'>Remote&nbsp</label>
       </div>`);
     this.formLoadSubject.append(this.radioSubjectLoadingLink);
+
+    //insert vertial divider
 
     //insert Subject Setting Button
     this.selectSubjectProperty = $(`<div class="languagebox">
@@ -70,7 +73,8 @@ class MainMenu {
     //lock the map size
     (this.chkShowSmallMap = $(`<div class="languagebox">
                                 <div id="checkShowSmallMapWrapper">
-                                    <label>Lock Map Size</label>
+                                <span class="mls-vertial-divider">|</span>
+                                <label>Lock Map Size</label>
                                     <input id="checkShowSmallMap" name="buttonShowPic" type = "checkbox" style="width: 14px!important"/>
                                 </div>
                             </div>`)),
@@ -95,7 +99,8 @@ class MainMenu {
 
     (this.chkLanguage = $(`<div class="languagebox">
                                 <div id="reportlanguage">
-                                    <label>cn</label>
+                                <span class="mls-vertial-divider">|</span>
+                                <label>cn</label>
                                     <input type="checkbox" name="checkbox" style="width: 14px!important" />
                                 </div>
                             </div>`)),

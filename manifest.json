@@ -194,6 +194,9 @@
         "./assets/lib/jquery.initialize-master/jquery.initialize.js",
         "./assets/lib/underscore/underscore-min.js",
         "./assets/scripts/Library.js",
+        "./assets/scripts/modules/LegalDescription.js",
+        "./assets/scripts/modules/AddressInfo.js",
+        "./assets/scripts/ui/uiListingInfo.js",
         "./content/mls-FullRealtor.js"
       ],
       "css": ["./temp/content.css", "./temp/bootstrap.min.css"],

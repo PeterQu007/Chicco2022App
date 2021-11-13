@@ -129,36 +129,39 @@
   padding: 0;
 }
 
-.flex-container > div > div{
+.flex-container > div > div {
   background-color: #f1f1f1;
   margin: 0 2px;
   padding: 0;
 }
 
-.mls-hr{
+.mls-hr {
   border: 0;
-  clear:both;
-  display:block;
-  width: 96%;               
+  clear: both;
+  display: block;
+  width: 96%;
   background-color: grey;
   height: 1px;
 }
 
-.mls-highlighted{
+.mls-highlighted {
   font-weight: bold;
 }
 
-.map-image-border{
-  border: 1px solid #C1E0FF; 
+.map-image-border {
+  border: 1px solid #c1e0ff;
 }
 
-.mls-color-red{
+.mls-color-red {
   color: red !important;
   text-decoration: underline;
 }
 
-.mls-color-red-2{
+.mls-color-red-2 {
   color: red !important;
   text-decoration: underline;
 }
 
+.mls-vertial-divider {
+  padding: 0px 10px;
+}

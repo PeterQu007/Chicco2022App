@@ -2,7 +2,7 @@
 // import GoogleMapsApi from "../modules/GoogleMapsApi";
 // const gmapApi = new GoogleMapsApi();
 
-export default class UIListingInfo {
+class UIListingInfo {
   constructor() {
     this.UIDiv = $('<div id="uiListingInfo"></div>');
     this.UIMap = $('<div id="uiListingMap"></div>');
@@ -18,7 +18,8 @@ export default class UIListingInfo {
     this.mlsNo = $("<div>MLS #</div>");
     //divs for strata & complex info:
     this.planNo = $('<div id="strataPlan">PlanNo: </div>');
-    this.planLink = $(`<a href="https://bcres.paragonrels.com/ParagonLS/Home/Page.mvc#HomeTab" 
+    this.planLink =
+      $(`<a href="https://bcres.paragonrels.com/ParagonLS/Home/Page.mvc#HomeTab" 
                             target="HomeTab" id="strataPlanLink" ></a>`);
     this.formalAddress = $('<div id="formalAddress"></div>');
     this.complexSummary = $('<div id="complexSummary"></div>');
