@@ -21,72 +21,60 @@ class SumBoxButtons extends React.Component {
       console.info("Hello React Chinese");
     }
 
-    return ( <
-      div className = "flex-container" >
-      <
-      div >
-      <
-      div >
-      <
-      button title = "Send CMA Listings"
-      onClick = {
-        this.onExp.bind(this)
-      } >
-      Exp <
-      /button> <
-      /div> <
-      div >
-      <
-      button title = "Resume Tax Searches"
-      onClick = {
-        () => this.onTaxSearch()
-      } >
-      Bca <
-      /button> <
-      /div> <
-      div >
-      <
-      button title = "Save Complex Name"
-      onClick = {
-        () => this.onSaveComplexInfo()
-      } >
-      Cpx <
-      /button> <
-      /div> <
-      /div> <
-      div >
-      <
-      div >
-      <
-      button title = "Save CMA Subject Info"
-      onClick = {
-        () => this.onSaveSubjectInfo()
-      } >
-      Sub <
-      /button> <
-      /div> <
-      div >
-      <
-      button title = "Send Listings Table to Map Search"
-      id = "mls-send-table-to-background"
-      onClick = {
-        () => this.onSendTableInfoToBackground()
-      } >
-      Tbl <
-      /button> <
-      /div> <
-      div >
-      <
-      button title = "Update RPS Listings Info(neighborhood)"
-      id = "mls-get-data"
-      onClick = {
-        () => this.onGetData()
-      } >
-      RPS <
-      /button> <
-      /div> <
-      /div> <
-      /div>
+    return (
+      <div className="flex-container">
+        <div>
+          <div>
+            <button title="Send CMA Listings" onClick={this.onExp.bind(this)}>
+              Exp{" "}
+            </button>{" "}
+          </div>{" "}
+          <div>
+            <button
+              title="Resume Tax Searches"
+              onClick={() => this.onTaxSearch()}
+            >
+              Bca{" "}
+            </button>{" "}
+          </div>{" "}
+          <div>
+            <button
+              title="Save Complex Name"
+              onClick={() => this.onSaveComplexInfo()}
+            >
+              Cpx{" "}
+            </button>{" "}
+          </div>{" "}
+        </div>{" "}
+        <div>
+          <div>
+            <button
+              title="Save CMA Subject Info"
+              onClick={() => this.onSaveSubjectInfo()}
+            >
+              Sub{" "}
+            </button>{" "}
+          </div>{" "}
+          <div>
+            <button
+              title="Send Listings Table to Map Search"
+              id="mls-send-table-to-background"
+              onClick={() => this.onSendTableInfoToBackground()}
+            >
+              Tbl{" "}
+            </button>{" "}
+          </div>{" "}
+          <div>
+            <button
+              title="Update RPS Listings Info(neighborhood)"
+              id="mls-get-data"
+              onClick={() => this.onGetData()}
+            >
+              RPS{" "}
+            </button>{" "}
+          </div>{" "}
+        </div>{" "}
+      </div>
     );
   }
 
@@ -136,7 +124,8 @@ class SumBoxButtons extends React.Component {
         if (urlLocation) {
           // ajax_url =
           //   "http://localhost/pidrealty4/wp-content/themes/Realhomes-child-3/db/updateRPSCommunity.php";
-          ajax_url = "https://pidrealty4.local/wp-content/themes/Realhomes-child-3/db/updateRPSCommunity.php";
+          ajax_url =
+            "https://pidrealty4.local/wp-content/themes/Realhomes-child-3/db/updateRPSCommunity.php";
         } else {
           ajax_url =
             "https://cn.pidhomes.ca/wp-content/themes/realhomes-child-3/db/updateRPSCommunity.php";
@@ -191,17 +180,14 @@ class SumBoxButtons extends React.Component {
   }
 
   onTaxSearch() {
-    let {
-      parent
-    } = this.props;
+    let { parent } = this.props;
     console.log(parent);
     parent.searchTax();
   }
 
   onExp() {
-    let {
-      tabTitle
-    } = this.props;
+    console.log("Export Listing Table Button Clicked!");
+    let { tabTitle } = this.props;
     ////---- Get the col name row, push names to the cloned table head row
     var htmlHead = document.querySelector(".ui-jqgrid-htable");
     var cloneHead = $(htmlHead).clone().attr("id", "newClonedHead");
@@ -253,9 +239,8 @@ class SumBoxButtons extends React.Component {
       }
       // ADD cma_ID to the array
       let subjectOptions = $("select#SubjectProperty", top.document); // get the select element defined by MainMenu.js
-      let cmaSubject = subjectOptions.children()[
-        subjectOptions.prop("selectedIndex")
-      ];
+      let cmaSubject =
+        subjectOptions.children()[subjectOptions.prop("selectedIndex")];
       let cmaID = cmaSubject.getAttribute("cmaID");
       cellValues.push(cmaID); //push the cma Subject ID into the array
       rowValues.push(cellValues);
@@ -438,21 +423,7 @@ class SumBoxButtons extends React.Component {
           // 50
           //REMOVE HEADER.CELLS
           let RemovalHeadCellsNo = [
-            39,
-            38,
-            37,
-            36,
-            34,
-            33,
-            24,
-            14,
-            9,
-            7,
-            6,
-            5,
-            4,
-            1,
-            0,
+            39, 38, 37, 36, 34, 33, 24, 14, 9, 7, 6, 5, 4, 1, 0,
           ];
           for (var j in RemovalHeadCellsNo) {
             $(row).children("td").eq(RemovalHeadCellsNo[j]).remove();
@@ -470,27 +441,8 @@ class SumBoxButtons extends React.Component {
           $(row).height(40);
           //REMOVE CELLS
           let RemovalHeadCellsNo = [
-            94,
-            93,
-            92,
-            91,
-            40,
-            39,
-            38,
-            34,
-            28,
-            27,
-            20,
-            19,
-            18,
-            17,
-            8,
-            7,
-            6,
-            5,
-            4,
-            1,
-            0,
+            94, 93, 92, 91, 40, 39, 38, 34, 28, 27, 20, 19, 18, 17, 8, 7, 6, 5,
+            4, 1, 0,
           ];
           for (var j in RemovalHeadCellsNo) {
             $(row).children("td").eq(RemovalHeadCellsNo[j]).remove();
@@ -538,27 +490,8 @@ class SumBoxButtons extends React.Component {
           $(row).height(40);
           //REMOVE CELLS
           let RemovalHeadCellsNo = [
-            94,
-            93,
-            92,
-            91,
-            40,
-            39,
-            38,
-            34,
-            28,
-            27,
-            20,
-            19,
-            18,
-            17,
-            8,
-            7,
-            6,
-            5,
-            4,
-            1,
-            0,
+            94, 93, 92, 91, 40, 39, 38, 34, 28, 27, 20, 19, 18, 17, 8, 7, 6, 5,
+            4, 1, 0,
           ];
           for (var j in RemovalHeadCellsNo) {
             $(row).children("td").eq(RemovalHeadCellsNo[j]).remove();
@@ -596,7 +529,7 @@ class SumBoxButtons extends React.Component {
     if (!table.nodeType) table = document.querySelector(table); //document.getElementById(table)
     var ctx = {
       worksheet: name || "Worksheet",
-      table: table.innerHTML
+      table: table.innerHTML,
     };
     window.location.href = uri + base64(format(template, ctx));
   }
@@ -608,9 +541,7 @@ class SumBoxButtons extends React.Component {
     ////////////////////
     ////MANUALLY SAVE OR UPDATE COMPLEX NAME TO THE DATABASE
     ////RECORD NO HAS TO BE LOOK UP THE CHECKED ONE IN THE TABLE
-    const {
-      tabTitle
-    } = this.props;
+    const { tabTitle } = this.props;
     //var self = this;
     var cols = $fx.setCols(tabTitle);
     ////SEARCH CHECKED RECORD NO
@@ -686,9 +617,8 @@ class SumBoxButtons extends React.Component {
     // get cma id
     // ADD cma_ID to the array
     let subjectOptions = $("select#SubjectProperty", top.document); // get the select element defined by MainMenu.js
-    let cmaSubject = subjectOptions.children()[
-      subjectOptions.prop("selectedIndex")
-    ];
+    let cmaSubject =
+      subjectOptions.children()[subjectOptions.prop("selectedIndex")];
     let cmaID = cmaSubject.getAttribute("cmaID");
 
     let ajax_url = "";
@@ -740,9 +670,7 @@ class SumBoxButtons extends React.Component {
   onSaveComplexInfo() {
     ////MANUALLY SAVE OR UPDATE COMPLEX NAME TO THE DATABASE
     ////RECORD NO HAS TO BE LOOK UP THE CHECKED ONE IN THE TABLE
-    const {
-      tabTitle
-    } = this.props;
+    const { tabTitle } = this.props;
     //var self = this;
     var cols = $fx.setCols(tabTitle);
     var complexName = $fx.normalizeComplexName(this.state.complexName.val()); ////NORMALIZED THE COMPLEX NAME
@@ -817,7 +745,8 @@ class SumBoxButtons extends React.Component {
 
       ////ASSEMBLE THE COMPLEX INFO OBJECT
       var complexInfo = {
-        _id: strataPlan +
+        _id:
+          strataPlan +
           "-" +
           address.streetNumber +
           "-" +

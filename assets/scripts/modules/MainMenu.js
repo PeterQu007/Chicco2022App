@@ -1,7 +1,7 @@
 //define the paragon mls Main Menu Class
 //store the frequently used menu function links in the class
 
-export default class MainMenu {
+class MainMenu {
   constructor() {
     this.appBanner = $("#app_banner");
     this.appLeftBanner = $("#app_banner_links_left");
@@ -74,7 +74,7 @@ export default class MainMenu {
                                     <input id="checkShowSmallMap" name="buttonShowPic" type = "checkbox" style="width: 14px!important"/>
                                 </div>
                             </div>`)),
-    this.chkShowSmallMap.insertAfter(this.appLeftBanner);
+      this.chkShowSmallMap.insertAfter(this.appLeftBanner);
 
     //lock the map type
     (this.chkLockRoadMapType = $(`<div class="languagebox">
@@ -83,7 +83,7 @@ export default class MainMenu {
                                     <input id="checkLockRoadMap" name="buttonShowMaptype" type = "checkbox" style="width: 14px!important"/>
                                 </div>
                             </div>`)),
-    this.chkLockRoadMapType.insertAfter(this.appLeftBanner);
+      this.chkLockRoadMapType.insertAfter(this.appLeftBanner);
 
     (this.txtResponse = $(`<div class="languagebox">
                                 <div id="textResponse">
@@ -91,7 +91,7 @@ export default class MainMenu {
                                     <input id="inputListingInfo" type="text" name="textbox" style="width: 150px!important" />
                                 </div>
                             </div>`)),
-    this.txtResponse.insertAfter(this.appLeftBanner);
+      this.txtResponse.insertAfter(this.appLeftBanner);
 
     (this.chkLanguage = $(`<div class="languagebox">
                                 <div id="reportlanguage">
@@ -99,14 +99,14 @@ export default class MainMenu {
                                     <input type="checkbox" name="checkbox" style="width: 14px!important" />
                                 </div>
                             </div>`)),
-    this.chkLanguage.insertAfter(this.appLeftBanner);
+      this.chkLanguage.insertAfter(this.appLeftBanner);
     (this.chkStopSearch = $(`<div class="languagebox">
                                 <div id="stopsearch">
                                     <label>stopsearch</label>
                                     <input id="inputstopsearch" type="checkbox" name="checkbox" style="width: 14px!important" />
                                 </div>
                             </div>`)),
-    this.chkStopSearch.insertAfter(this.appLeftBanner);
+      this.chkStopSearch.insertAfter(this.appLeftBanner);
     this.taxSearch = $('a[url="/ParagonLS/Search/Tax.mvc?DBid=1&countyID=1"]');
     this.savedSearches = $(
       'a[url="/ParagonLS/Search/Property.mvc/LoadSavedSearch"]'
@@ -176,7 +176,7 @@ export default class MainMenu {
       method: "post",
       data: {
         address: address,
-        postID: id
+        postID: id,
       },
       dataType: "json",
       success: function (res) {

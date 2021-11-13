@@ -1,12 +1,12 @@
 //background script, event mode
 //message passed between background - defaultpage - iframes
 
-import database from "../assets/scripts/modules/Database";
-import dbOffline from "../assets/scripts/modules/Database Offline";
-import { callbackify } from "util";
+// import database from "../assets/scripts/modules/Database";
+// import dbOffline from "../assets/scripts/modules/Database Offline";
+// import { callbackify } from "util";
 
-var db = new database();
-var dbo = new dbOffline();
+var db = new Database();
+// var dbo = new dbOffline();
 var $fx = L$();
 var newTaxYear = true; //beginning of new year, MLS tax db has not been updated, still use last year's assess. set newTaxYear to false
 var d = new Date();

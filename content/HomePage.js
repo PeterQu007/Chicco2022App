@@ -3,11 +3,13 @@
 // the messages are passed between the defaultpage and iframes, all are the content scripts
 
 //import Tabs from '../assets/scripts/modules/mlsTabs';
-import MainNavBar, {
-  mainNavItem
-} from "../assets/scripts/modules/MainNavBar";
-import MainMenu from "../assets/scripts/modules/MainMenu";
-var _ = require("underscore");
+// import MainNavBar, {
+//   mainNavItem
+// } from "../assets/scripts/modules/MainNavBar";
+// let mainNavItem = new MainnNavBar();
+// import MainMenu from "../assets/scripts/modules/MainMenu";
+// let MainMenu = new MainMenu();
+// var _ = require("underscore");
 
 (function ($) {
   $.fn.inlineStyle = function (prop) {
@@ -107,7 +109,7 @@ let DefaultPage = {
           );
           self.curTabID = curTabLink.attr("href");
           chrome.storage.local.set({
-            curTabID: self.curTabID
+            curTabID: self.curTabID,
           });
         }
 
@@ -122,11 +124,14 @@ let DefaultPage = {
           self.curTabID = self.curTabLink.attr("href");
           console.log("current Tab ID is: ", self.curTabID);
           // save the curTabID
-          chrome.storage.local.set({
-            curTabID: self.curTabID
-          }, function () {
-            console.log("curTabID has been save to storage.");
-          });
+          chrome.storage.local.set(
+            {
+              curTabID: self.curTabID,
+            },
+            function () {
+              console.log("curTabID has been save to storage.");
+            }
+          );
         }
 
         //Sync Tab to Content
@@ -159,7 +164,7 @@ let DefaultPage = {
               console.log("find tabTitle:", navItem.ID, navItem.Title);
               sendResponse({
                 tabID: navItem.ID,
-                tabTitle: navItem.Title
+                tabTitle: navItem.Title,
               });
             }
           });
@@ -214,7 +219,7 @@ let DefaultPage = {
     var array1 = [1, 2, 3, 4, 5, 6];
     console.log({
       postTitle: title,
-      postID: id
+      postID: id,
     });
     console.log(_);
     var subArray = _.max(array1);
@@ -241,7 +246,7 @@ let DefaultPage = {
       method: "post",
       data: {
         postTitle: title,
-        postID: id
+        postID: id,
       },
       success: function (res) {
         console.log(res);

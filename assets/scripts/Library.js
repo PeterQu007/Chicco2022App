@@ -1,6 +1,6 @@
 //common functions module
 
-(function (global, $) {
+(function (global, $, _) {
   let Library = function () {
     return new Library.init();
   };
@@ -11,7 +11,7 @@
     Land: "Land",
   };
 
-  let _ = require("underscore");
+  // let _ = require("underscore");
 
   Library.prototype = {
     getDecimalNumber: function (strNum) {
@@ -212,13 +212,13 @@
       return this;
     },
 
-    getSearchTabID: function (str = '') {
+    getSearchTabID: function (str = "") {
       //"https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/0?&Address=&City=&State=&Zip=&MapZoom=15&
       //CenterLat=49.1592529817306&CenterLng=-122.799000899396&SearchCount=11&IsFromSearch=true&tabName=tab4_1_1"
       let searchTabIDRegex = /tab\d_\d_\d/g;
       let src, start, end;
 
-      if (str == '') {
+      if (str == "") {
         uri1 = window.frameElement.src;
         if (searchTabIDRegex.test(uri1)) {
           src = uri1.match(searchTabIDRegex)[0];
@@ -234,26 +234,26 @@
           src = uri3.match(searchTabIDRegex)[0];
           return `#${src}`;
         }
-        return '#';
+        return "#";
       } else {
         if (searchTabIDRegex.test(str)) {
           src = str.match(searchTabIDRegex)[0];
           return "#" + src;
         } else {
           return "#";
-        };
+        }
       }
     },
 
-    getTabID: function (str = '') {
-      // does not work for uri: 
+    getTabID: function (str = "") {
+      // does not work for uri:
       //"https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/0?&Address=&City=&State=&Zip=&MapZoom=15&
       //CenterLat=49.1592529817306&CenterLng=-122.799000899396&SearchCount=11&IsFromSearch=true&tabName=tab4_1_1"
       let tabRegex = /tabName=tab(\d_)+\d$/g;
       let tabIDRegex = /tab\d/g;
       let src, start, end;
 
-      if (str == '') {
+      if (str == "") {
         uri1 = window.frameElement.src;
         if (tabIDRegex.test(uri1)) {
           src = uri1.match(tabIDRegex)[0];
@@ -269,14 +269,14 @@
           src = uri3.match(tabIDRegex)[0];
           return `#${src}`;
         }
-        return '#';
+        return "#";
       } else {
         if (tabIDRegex.test(str)) {
           src = str.match(tabIDRegex)[0];
           return "#" + src;
         } else {
           return "#";
-        };
+        }
       }
 
       src = str;
@@ -294,7 +294,7 @@
       src = src.substring(0, end);
       //console.log('QuickSearch Page\'s tabID is:', src);
 
-      if (start > 0 && src.trim() == '') {
+      if (start > 0 && src.trim() == "") {
         src = src.match(tabRegex);
         if (src.length > 0) {
           src = src[0];
@@ -500,7 +500,7 @@
         "Lions Bay",
         "Abbotsford",
         "Anmore",
-        "Belcarra"
+        "Belcarra",
       ];
       if (cities.includes(city)) {
         return true;
@@ -683,9 +683,10 @@
         uniqueComplexInfo.Parking = this.uniqueJsonStringList(
           uniqueComplexInfo.Parking
         );
-        uniqueComplexInfo.ManagementCoName = this.uniqueJsonStringList_ManagementCo(
-          uniqueComplexInfo.ManagementCoName
-        );
+        uniqueComplexInfo.ManagementCoName =
+          this.uniqueJsonStringList_ManagementCo(
+            uniqueComplexInfo.ManagementCoName
+          );
         uniqueComplexInfo.ManagementCoPhone = this.uniqueJsonStringList(
           uniqueComplexInfo.ManagementCoPhone
         );
@@ -729,4 +730,4 @@
   Library.init.prototype = Library.prototype;
 
   global.Library = global.L$ = Library;
-})(window, jQuery);
+})(window, jQuery, _);

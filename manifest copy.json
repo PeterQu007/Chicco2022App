@@ -16,17 +16,13 @@
   "background": {
     "scripts": [
       "./assets/lib/pouchdb/dist/pouchdb.js",
-      "./assets/lib/pouchdb-authentication/pouchdb.authentication.min.js",
       "./assets/lib/jquery/dist/jquery.min.js",
-      "./assets/lib/underscore/underscore-min.js",
-      "./assets/scripts/Library.js",
-      "./assets/scripts/modules/Database.js",
-      "./background/eventPage.js"
+      "./temp/scripts/Library.js",
+      "./temp/scripts/EventPage.js"
     ],
     "persistent": false
   },
-  "content_scripts": [
-    {
+  "content_scripts": [{
       //Paragon Login Page
       //Function: Automatically login with Username and Password
       "matches": [
@@ -35,9 +31,11 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./content/@mls-Login.js"
+        "./temp/scripts/@mls-login.js"
       ],
-      "css": ["./temp/content.css"]
+      "css": [
+        "./temp/content.css"
+      ]
     },
     {
       //Paragon Default Page shown on Address Bar, Tailing # showing the Current Main Tab #
@@ -49,12 +47,11 @@
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
         "./assets/lib/jquery.initialize-master/jquery.initialize.js",
-        "./assets/scripts/modules/MainNavBar.js",
-        "./assets/scripts/modules/MainMenu.js",
-        "./assets/lib/underscore/underscore-min.js",
-        "./content/HomePage.js"
+        "./temp/scripts/HomePage.js"
       ],
-      "css": ["./temp/content.css"]
+      "css": [
+        "./temp/content.css"
+      ]
     },
     ////TabHome: Paragon Home Page////
     //////////////////////////////////
@@ -62,14 +59,17 @@
       //Paragon Home Tab Page (HomeTab)
       //Function: Home Page Quick Search Feature
       "run_at": "document_end",
-      "matches": ["https://bcres.paragonrels.com/ParagonLS/Home/Page.mvc"],
+      "matches": [
+        "https://bcres.paragonrels.com/ParagonLS/Home/Page.mvc"
+      ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./assets/lib/underscore/underscore-min.js",
-        "./assets/scripts/Library.js",
-        "./content/HomePageQuickSearch.js"
+        "./temp/scripts/Library.js",
+        "./temp/scripts/MLS-HomePageQuickSearch.js"
       ],
-      "css": ["./temp/mls.css"],
+      "css": [
+        "./temp/mls.css"
+      ],
       "all_frames": true
     },
     ////Tab1: Property Tax Search & Results Page////
@@ -83,7 +83,7 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./content/TaxSearchCriteria.js"
+        "./temp/scripts/MLS-TaxSearchCriteria.js"
       ],
       "all_frames": true
     },
@@ -96,7 +96,7 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./content/TaxSearchResult.js"
+        "./temp/scripts/MLS-TaxSearchResult.js"
       ],
       "all_frames": true
     },
@@ -109,7 +109,7 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./content/TaxSearchDetails.js"
+        "./temp/scripts/MLS-TaxSearchDetails.js"
       ],
       "all_frames": true
     },
@@ -131,7 +131,7 @@
         "./temp/scripts/CountBody2-Modulejs.js",
         "./temp/scripts/CountBody3-SearchCriteriajs.js",
         //"./temp/scripts/MLS-BypassListingSearchCriteria.js"
-        "./content/BypassListingSearchCriteria.js"
+        "./temp/scripts/BypassListingSearchCriteria.js"
       ],
       "all_frames": true
     },
@@ -147,13 +147,14 @@
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
         "./assets/lib/jquery.initialize-master/jquery.initialize.js",
-        "./assets/lib/underscore/underscore-min.js",
         "./assets/lib/react/react.development.js",
         "./assets/lib/react/react-dom.development.js",
-        "./assets/scripts/Library.js",
+        "./temp/scripts/Library.js",
         "./temp/scripts/MLS-AddSFPriceSummaryBox.js"
       ],
-      "css": ["./temp/content.css"],
+      "css": [
+        "./temp/content.css"
+      ],
       "all_frames": true
     },
     {
@@ -170,13 +171,14 @@
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
         "./assets/lib/jquery.initialize-master/jquery.initialize.js",
-        "./assets/lib/underscore/underscore-min.js",
         "./assets/lib/react/react.development.js",
         "./assets/lib/react/react-dom.development.js",
-        "./assets/scripts/Library.js",
+        "./temp/scripts/Library.js",
         "./temp/scripts/MLS-SpreadSheetCompletion.js"
       ],
-      "css": ["./temp/content.css"],
+      "css": [
+        "./temp/content.css"
+      ],
       "all_frames": true
     },
     {
@@ -192,11 +194,13 @@
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
         "./assets/lib/jquery.initialize-master/jquery.initialize.js",
-        "./assets/lib/underscore/underscore-min.js",
-        "./assets/scripts/Library.js",
-        "./content/mls-FullRealtor.js"
+        "./temp/scripts/Library.js",
+        "./temp/scripts/MLS-FullRealtor.js"
       ],
-      "css": ["./temp/content.css", "./temp/bootstrap.min.css"],
+      "css": [
+        "./temp/content.css",
+        "./temp/bootstrap.min.css"
+      ],
       "all_frames": true
     },
     {
@@ -213,7 +217,6 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./assets/lib/underscore/underscore-min.js",
         // "./assets/lib/jquery.initialize-master/jquery.initialize.js",
         // "https://bcres.paragonrels.com/ParagonLS/Scripts/GoogleMaps/google-general.js?1053515",
         // "./assets/scripts/packages/module.js",
@@ -222,10 +225,13 @@
         // "./assets/scripts/googleMaps/google-drawing.js",
         // "./assets/scripts/focus/focus.google.init.js",
         // "./assets/scripts/GoogleMaps/google-api.js",
-        "./assets/scripts/Library.js",
-        "./content/mls-MapView.js"
+        "./temp/scripts/Library.js",
+        "./temp/scripts/MLS-MapView.js"
       ],
-      "css": ["./temp/content.css", "./temp/bootstrap.min.css"],
+      "css": [
+        "./temp/content.css",
+        "./temp/bootstrap.min.css"
+      ],
       "all_frames": true
     },
     {
@@ -241,9 +247,8 @@
       "js": [
         //"https://maps.googleapis.com/maps/api/js?callback=initMap&signed_in=true&key=AIzaSyD1QvoySzCNvNj3Dffh0uMJfGMLf-NtOME",
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./assets/lib/underscore/underscore-min.js",
-        "./assets/scripts/Library.js",
-        "./content/mls-FullPublic.js"
+        "./temp/scripts/Library.js",
+        "./temp/scripts/MLS-FullPublic.js"
       ],
       "all_frames": true
     },
@@ -257,9 +262,11 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./content/mls-warning.js"
+        "./temp/scripts/mls-warning.js"
       ],
-      "css": ["./temp/mls.css"],
+      "css": [
+        "./temp/mls.css"
+      ],
       "all_frames": true
     },
     {
@@ -270,9 +277,11 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./content/mls-logout.js"
+        "./temp/scripts/mls-logout.js"
       ],
-      "css": ["./temp/mls.css"],
+      "css": [
+        "./temp/mls.css"
+      ],
       "all_frames": true
     },
     {
@@ -283,9 +292,11 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./content/mls-export.js"
+        "./temp/scripts/mls-export.js"
       ],
-      "css": ["./temp/mls.css"],
+      "css": [
+        "./temp/mls.css"
+      ],
       "all_frames": true
     },
     {
@@ -295,9 +306,11 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
-        "./content/mls-QuickSearch2.js"
+        "./temp/scripts/MLS-QuickSearch2.js"
       ],
-      "css": ["./temp/content.css"],
+      "css": [
+        "./temp/content.css"
+      ],
       "all_frames": true
     }
   ],
@@ -311,5 +324,7 @@
     "storage"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-  "web_accessible_resources": ["./content/modules/test.js"]
+  "web_accessible_resources": [
+    "./content/modules/test.js"
+  ]
 }

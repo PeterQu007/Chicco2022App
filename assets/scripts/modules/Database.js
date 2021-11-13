@@ -4,15 +4,47 @@
 class Database {
   constructor() {
     //console.group('database constructor');
-    this.dbAssess = new PouchDB("http://localhost:5984/bcassessment");
-    this.dbComplex = new PouchDB("http://localhost:5984/complex");
-    this.dbExposure = new PouchDB("http://localhost:5984/exposure");
-    this.dbListing = new PouchDB("http://localhost:5984/listing");
+    this.dbAssess = new PouchDB("http://localhost:5984/bcassessment", {
+      skip_Setup: true,
+    });
+    this.dbAssess.logIn("admin", "escape88", (err, res) => {
+      console.log(res);
+    });
+    this.dbComplex = new PouchDB("http://localhost:5984/complex", {
+      skip_Setup: true,
+    });
+    this.dbComplex.logIn("admin", "escape88", (res) => {
+      console.log(res);
+    });
+    this.dbExposure = new PouchDB("http://localhost:5984/exposure", {
+      skip_Setup: true,
+    });
+    this.dbExposure.logIn("admin", "escape88", (res) => {
+      console.log(res);
+    });
+    this.dbListing = new PouchDB("http://localhost:5984/listing", {
+      skip_Setup: true,
+    });
+    this.dbListing.logIn("admin", "escape88", (res) => {
+      console.log(res);
+    });
     //http://localhost:5984/_utils/#/database/exposure/_all_docs
     this.dbStrataPlanSummary = new PouchDB(
-      "http://localhost:5984/strataplansummary"
+      "http://localhost:5984/strataplansummary",
+      {
+        skip_Setup: true,
+      }
     );
-    this.dbShowing = new PouchDB("http://localhost:5984/showing");
+    this.dbStrataPlanSummary.logIn("admin", "escape88", (res) => {
+      console.log(res);
+    });
+    this.dbShowing = new PouchDB("http://localhost:5984/showing", {
+      skip_Setup: true,
+    });
+    this.dbShowing.logIn("admin", "escape88", (res) => {
+      console.log(res);
+    });
+
     this.dbAssess.info().then(function (info) {
       //console.log(info);
     });
@@ -435,4 +467,4 @@ class Database {
   }
 }
 
-export default Database;
+// export default Database;
