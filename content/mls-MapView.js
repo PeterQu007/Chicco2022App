@@ -16,36 +16,42 @@ function showLargeMap() {
   var x = $(window.frameElement);
   var z = $("#divMap");
   var v = $("#jqMpCntlTopMenu");
-  var w = $("div.jqMpCntlSubMenuImg.jqMpCntlSubMenuMpTypeAerial");
-  var pics = $("div#uiListingPics", parent.document);
+  // var w = $("div.jqMpCntlSubMenuImg.jqMpCntlSubMenuMpTypeAerial");
+
+  var w = lockRoadMap
+    ? $("div.jqMpCntlSubMenuImg.jqMpCntlSubMenuMpTypeRoad")
+    : $("div.jqMpCntlSubMenuImg.jqMpCntlSubMenuMpTypeAerial");
   w.click();
+
+  var pics = $("div#uiListingPics", parent.document);
+  // w.click();
 
   v.css("z-index", 9999);
 
   if (z.hasClass("mapBox__large")) {
     // z.removeClass("mapbox__large");
-    x.width(500);
-    x.height(810);
+    x.width(1600);
+    x.height(960);
     x.css("z-index", 5000);
 
     console.log(z);
     z.removeClass("mapBox__large");
-    z.width(498);
+    z.width(800);
     z.css("z-index", 5000);
-    z.height(800);
+    z.height(960);
     pics.css("z-index", 10);
     pics.css("background-color", "#fff");
   } else {
     // console.log(x);
-    x.width(1000);
-    x.height(820);
+    x.width(1600);
+    x.height(960);
     x.css("z-index", 5000);
 
     console.log(z);
     z.addClass("mapBox__large");
-    z.width(990);
+    z.width(1600);
     z.css("z-index", 5000);
-    z.height(810);
+    z.height(960);
     pics.css("z-index", -10);
   }
 }
@@ -64,7 +70,8 @@ function checkComplete() {
       //check the new item exists or not
       console.log($("#jqMpCntlTopMenuList"));
       var menu = $("#jqMpCntlTopMenuList");
-      var newItem = $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
+      var newItem =
+        $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
                     <li class="jqMpCntlTopMenListItm zoomInChange", id="jqMpCntlTopMenuActionLayers">
                     <div class="jqMpCntlTopMenuBtn zoomInChange" onclick="$.bkfsMap.divMap.setZoom(${zoomNumber})" 
                     data-tooltip="Change Map Zoom"><span><strong>+</strong></span></div>
@@ -73,13 +80,15 @@ function checkComplete() {
     } else if ($("li.zoomOutChange").length == 0) {
       console.log($("#jqMpCntlTopMenuList"));
       var menu = $("#jqMpCntlTopMenuList");
-      var newItem = $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
+      var newItem =
+        $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
                     <li class="jqMpCntlTopMenListItm zoomOutChange", id="jqMpCntlTopMenuActionLegends">
                     <div class="jqMpCntlTopMenuBtn zoomOutChange" onclick="$.bkfsMap.divMap.setZoom(15)" 
                     data-tooltip="Change Map Zoom"><span><strong>-</strong></span></div>
                     </li>`);
       newItem.appendTo(menu);
-      var newMapTypeItem = $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
+      var newMapTypeItem =
+        $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
                     <li class="jqMpCntlTopMenListItm">
                     <div class="jqMpCntlTopMenuBtn jqMpCntlSubMenuImg jqMpCntlSubMenuMpTypeRoad roadMapType" onclick="zoomOutToRoadMapView()" 
                     data-tooltip="Change Map Zoom"><span><strong style="color:red">-</strong></span></div>
@@ -87,18 +96,21 @@ function checkComplete() {
       newMapTypeItem.appendTo(menu);
       //$.bkfsMap.divMap.setMapTypeId('satellite')
       // $.bkfsMap.divMap.setMapTypeId("roadmap");
-      var newMapType2Item = $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
+      var newMapType2Item =
+        $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
                     <li class="jqMpCntlTopMenListItm">
                     <div class="jqMpCntlTopMenuBtn jqMpCntlSubMenuImg jqMpCntlSubMenuMpTypeAerial aerialMapType" onclick="zoomInToSatelliteView()" 
                     data-tooltip="Change Map Zoom"><span><strong style="color:red">+</strong></span></div>
                     </li>`);
       newMapType2Item.appendTo(menu);
-      var newButtonItem = $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
+      var newButtonItem =
+        $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
                     <li class="jqMpCntlTopMenListItm">
                     <button id="changeSizeButton" class="changeSizeButton"  
                     data-tooltip="Change Map Size">Pic</button>
                     </li>`);
-      var showMapCheck = $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
+      var showMapCheck =
+        $(`<li class="jqMpCntlTopMenListItm"><div class="jqMpCntlTopMenuDivider"></div></li>
                     <li class="jqMpCntlTopMenListItm" >
                     <input id="showSmallMap" type="checkbox" name="checkbox" style="width: 14px!important" />
                     </li>

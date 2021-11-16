@@ -107,7 +107,7 @@ class UIListingInfo {
 
     //add images
     var i = 0;
-    for (i = 0; i < 20; i++) {
+    for (i = 0; i < 40; i++) {
       let imgAnchor = $('<a href=""></a>');
       imgAnchor.attr("id", "imgAnchor" + i);
 

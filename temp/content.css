@@ -36,8 +36,8 @@
 
 .mapView {
   border: 1px solid red;
-  width: 500px;
-  height: 720px;
+  width: 800px;
+  height: 960px;
   padding: 0px 0px;
   position: absolute;
   top: 0px;
@@ -45,18 +45,18 @@
 }
 
 .mapBox {
-  width: 498px;
-  height: 680px;
+  width: 800px;
+  height: 960px;
 }
 
 .mapView__large {
-  width: 1000px;
-  height: 820px;
+  width: 1600px;
+  height: 960px;
 }
 
 .mapBox__large {
-  width: 990px;
-  height: 720px;
+  width: 180px;
+  height: 960px;
 }
 
 .roadMapType {
@@ -83,12 +83,12 @@
 
 .picContainer {
   border: 1px solid red;
-  width: 515px;
-  height: 840px;
+  width: 820px;
+  height: 960px;
   padding: 5px 5px;
   position: absolute;
   top: 0px;
-  left: 1425px;
+  left: 1725px;
   z-index: -10;
 }
 
