@@ -4,26 +4,28 @@
 class Database {
   constructor() {
     //console.group('database constructor');
+    // REF Pouchdb login
+    // https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/setup.md
     this.dbAssess = new PouchDB("http://localhost:5984/bcassessment", {
-      skip_Setup: true,
+      skip_setup: true,
     });
     this.dbAssess.logIn("admin", "escape88", (err, res) => {
       console.log(res);
     });
     this.dbComplex = new PouchDB("http://localhost:5984/complex", {
-      skip_Setup: true,
+      skip_setup: true,
     });
     this.dbComplex.logIn("admin", "escape88", (res) => {
       console.log(res);
     });
     this.dbExposure = new PouchDB("http://localhost:5984/exposure", {
-      skip_Setup: true,
+      skip_setup: true,
     });
     this.dbExposure.logIn("admin", "escape88", (res) => {
       console.log(res);
     });
     this.dbListing = new PouchDB("http://localhost:5984/listing", {
-      skip_Setup: true,
+      skip_setup: true,
     });
     this.dbListing.logIn("admin", "escape88", (res) => {
       console.log(res);
@@ -32,14 +34,14 @@ class Database {
     this.dbStrataPlanSummary = new PouchDB(
       "http://localhost:5984/strataplansummary",
       {
-        skip_Setup: true,
+        skip_setup: true,
       }
     );
     this.dbStrataPlanSummary.logIn("admin", "escape88", (res) => {
       console.log(res);
     });
     this.dbShowing = new PouchDB("http://localhost:5984/showing", {
-      skip_Setup: true,
+      skip_setup: true,
     });
     this.dbShowing.logIn("admin", "escape88", (res) => {
       console.log(res);

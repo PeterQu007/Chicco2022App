@@ -168,11 +168,15 @@ function checkComplete() {
       var buttonClosePanel = $("#jqMpCntlLyrsPnlCloser");
       var x5 = buttonClosePanel.children("div")[0];
 
+      var changeMapSize = $("#changeSizeButton");
+
       setTimeout(() => {
+        var changeMapSize = $("#changeSizeButton");
         x3_div0.click();
-        x4_div0.click();
+        if (x4_div0) x4_div0.click();
         x3_div1.click();
-        x4_div1.click();
+        if (x4_div1) x4_div1.click();
+        showLargeMap();
         // x5.click();
       }, 1000);
 
