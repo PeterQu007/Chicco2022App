@@ -1,11 +1,15 @@
 // Assessment information <=> mySQL table wp_pid_assess
 
-'use strict';
+"use strict";
 
-const DATA_ASSESSMENT_API_URL_LOCAL = "https://pidrealty4.local/wp-content/themes/realhomes-child-3/db/dataAssessInfo.php";
-const DATA_ASSESSMENT_API_URL_LIVE = "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/dataAssessInfo.php";
+// const $fx = $L();
 
-const postAssessInfo = function (assessInfos) {
+const DATA_ASSESSMENT_API_URL_LOCAL =
+  "https://pidrealty4.local/wp-content/themes/realhomes-child-3/db/dataAssessInfo.php";
+const DATA_ASSESSMENT_API_URL_LIVE =
+  "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/dataAssessInfo.php";
+
+const postAssessInfo = function (assessInfos, $fx) {
   //console.log(this.complexInfos);
   let urlLocationOptionLocal = $("#pid_local", top.document);
   let urlLocation = urlLocationOptionLocal.prop("checked");
@@ -21,11 +25,13 @@ const postAssessInfo = function (assessInfos) {
     ajax_url = DATA_ASSESSMENT_API_URL_LIVE;
   }
 
+  ajax_url = $fx.getPIDAjaxUrl() + "dataAssessInfo.php";
+
   $.ajax({
     url: ajax_url,
     method: "post",
     data: {
-      assessInfos: assessInfos
+      assessInfos: assessInfos,
     },
     success: function (res) {
       console.log("ajax::", res);
@@ -35,14 +41,14 @@ const postAssessInfo = function (assessInfos) {
       });
     },
   });
-}
+};
 
 class Assessment {
   constructor() {
     this.assessInfos = null;
   }
 
-  postAssessInfos(assessInfos) {
+  postAssessInfos(assessInfos, $fx) {
     let urlLocationOptionLocal = $("#pid_local", top.document);
     let urlLocation = urlLocationOptionLocal.prop("checked");
     let ajax_url = "";
@@ -53,11 +59,13 @@ class Assessment {
       ajax_url = DATA_ASSESSMENT_API_URL_LIVE;
     }
 
+    ajax_url = $fx.getPIDAjaxUrl() + "dataAssessInfo.php";
+
     $.ajax({
       url: ajax_url,
       method: "post",
       data: {
-        assessInfos: assessInfos
+        assessInfos: assessInfos,
       },
       success: function (res) {
         console.log("ajax::", res);

@@ -1,6 +1,6 @@
 {
   "name": "MLSHelper",
-  "version": "1.0.0",
+  "version": "2022.1.0",
   "manifest_version": 2,
   "description": "MLS Helper",
   "icons": {
@@ -49,9 +49,10 @@
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
         "./assets/lib/jquery.initialize-master/jquery.initialize.js",
+        "./assets/lib/underscore/underscore-min.js",
+        "./assets/scripts/Library.js",
         "./assets/scripts/modules/MainNavBar.js",
         "./assets/scripts/modules/MainMenu.js",
-        "./assets/lib/underscore/underscore-min.js",
         "./content/HomePage.js"
       ],
       "css": ["./temp/content.css"]
@@ -171,9 +172,9 @@
         "./assets/lib/jquery/dist/jquery.min.js",
         "./assets/lib/jquery.initialize-master/jquery.initialize.js",
         "./assets/lib/underscore/underscore-min.js",
+        "./assets/scripts/Library.js",
         "./assets/lib/react/react.development.js",
         "./assets/lib/react/react-dom.development.js",
-        "./assets/scripts/Library.js",
         "./temp/scripts/MLS-SpreadSheetCompletion.js"
       ],
       "css": ["./temp/content.css"],

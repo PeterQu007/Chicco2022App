@@ -1,6 +1,6 @@
 "use strict";
 
-import addressInfo from "../modules/AddressInfo";
+import addressInfo from "../modules/AddressInfoExport";
 var $fx = L$();
 
 class SumBoxButtons extends React.Component {
@@ -118,18 +118,25 @@ class SumBoxButtons extends React.Component {
       success: function (res) {
         //console.log("res::", JSON.stringify(res));
         let urlLocationOptionLocal = $("#pid_local", top.document);
-        let urlLocation = urlLocationOptionLocal.prop("checked");
+        let urlLocationOptionSynology = $("#pid_synology", top.document);
+        let urlLocation =
+          urlLocationOptionLocal.prop("checked") || urlLocationOptionSynology;
         let ajax_url = "";
 
         if (urlLocation) {
-          // ajax_url =
-          //   "http://localhost/pidrealty4/wp-content/themes/Realhomes-child-3/db/updateRPSCommunity.php";
-          ajax_url =
-            "https://pidrealty4.local/wp-content/themes/Realhomes-child-3/db/updateRPSCommunity.php";
+          if (urlLocationOptionLocal) {
+            ajax_url =
+              "https://pidrealty4.local/wp-content/themes/Realhomes-child-3/db/updateRPSCommunity.php";
+          } else {
+            ajax_url =
+              "https://pidrealty.ca/wp-content/themes/Realhomes-child-3/db/updateRPSCommunity.php";
+          }
         } else {
           ajax_url =
             "https://cn.pidhomes.ca/wp-content/themes/realhomes-child-3/db/updateRPSCommunity.php";
         }
+
+        ajax_url = $fx.getPIDAjaxUrl() + "updateRPSCommunity.php";
 
         let _listings = res.rows;
         let listings = [];
@@ -260,6 +267,8 @@ class SumBoxButtons extends React.Component {
       ajax_url =
         "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/dbSaveCMAInfo.php";
     }
+
+    ajax_url = $fx.getPIDAjaxUrl() + "dbSaveCMAInfo.php";
 
     //////----DEFINE CMA OBJECT DATA
     var cmaInfo = {
@@ -632,6 +641,8 @@ class SumBoxButtons extends React.Component {
       ajax_url =
         "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/dbAddSubjectProperty.php";
     }
+
+    ajax_url = $fx.getPIDAjaxUrl() + "dbAddSubjectProperty.php";
 
     var subjectInfo = {
       cmaID: cmaID,

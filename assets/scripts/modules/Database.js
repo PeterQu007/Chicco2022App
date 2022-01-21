@@ -6,64 +6,80 @@ class Database {
     //console.group('database constructor');
     // REF Pouchdb login
     // https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/setup.md
-    this.dbAssess = new PouchDB("http://localhost:5984/bcassessment", {
-      skip_setup: true,
-    });
-    this.dbAssess.logIn("admin", "escape88", (err, res) => {
-      console.log(res);
-    });
-    this.dbComplex = new PouchDB("http://localhost:5984/complex", {
-      skip_setup: true,
-    });
-    this.dbComplex.logIn("admin", "escape88", (res) => {
-      console.log(res);
-    });
-    this.dbExposure = new PouchDB("http://localhost:5984/exposure", {
-      skip_setup: true,
-    });
-    this.dbExposure.logIn("admin", "escape88", (res) => {
-      console.log(res);
-    });
-    this.dbListing = new PouchDB("http://localhost:5984/listing", {
-      skip_setup: true,
-    });
-    this.dbListing.logIn("admin", "escape88", (res) => {
-      console.log(res);
-    });
-    //http://localhost:5984/_utils/#/database/exposure/_all_docs
-    this.dbStrataPlanSummary = new PouchDB(
-      "http://localhost:5984/strataplansummary",
+    this.dbAssess = new PouchDB(
+      "http://admin:escape88@localhost:5984/bcassessment",
       {
         skip_setup: true,
       }
     );
-    this.dbStrataPlanSummary.logIn("admin", "escape88", (res) => {
-      console.log(res);
-    });
-    this.dbShowing = new PouchDB("http://localhost:5984/showing", {
-      skip_setup: true,
-    });
-    this.dbShowing.logIn("admin", "escape88", (res) => {
-      console.log(res);
-    });
+    // Try to use pouchDB plugin to login, but not work
+    // this.dbAssess.logIn("admin", "escape88", (err, res) => {
+    //   console.log(res);
+    // });
+    this.dbComplex = new PouchDB(
+      "http://admin:escape88@localhost:5984/complex",
+      {
+        skip_setup: true,
+      }
+    );
+    // this.dbComplex.logIn("admin", "escape88", (res) => {
+    //   console.log(res);
+    // });
+    this.dbExposure = new PouchDB(
+      "http://admin:escape88@localhost:5984/exposure",
+      {
+        skip_setup: true,
+      }
+    );
+    // this.dbExposure.logIn("admin", "escape88", (res) => {
+    //   console.log(res);
+    // });
+    this.dbListing = new PouchDB(
+      "http://admin:escape88@localhost:5984/listing",
+      {
+        skip_setup: true,
+      }
+    );
+    // this.dbListing.logIn("admin", "escape88", (res) => {
+    //   console.log(res);
+    // });
+    //http://localhost:5984/_utils/#/database/exposure/_all_docs
+    this.dbStrataPlanSummary = new PouchDB(
+      "http://admin:escape88@localhost:5984/strataplansummary",
+      {
+        skip_setup: true,
+      }
+    );
+    // this.dbStrataPlanSummary.logIn("admin", "escape88", (res) => {
+    //   console.log(res);
+    // });
+    this.dbShowing = new PouchDB(
+      "http://admin:escape88@localhost:5984/showing",
+      {
+        skip_setup: true,
+      }
+    );
+    // this.dbShowing.logIn("admin", "escape88", (res) => {
+    //   console.log(res);
+    // });
 
     this.dbAssess.info().then(function (info) {
-      //console.log(info);
+      console.log(info);
     });
     this.dbComplex.info().then(function (info) {
-      //console.log(info);
+      console.log(info);
     });
     this.dbExposure.info().then(function (info) {
-      // console.log(info);
+      console.log(info);
     });
     this.dbListing.info().then(function (info) {
       console.log(info);
     });
     this.dbStrataPlanSummary.info().then(function (info) {
-      //console.log(info);
+      console.log(info);
     });
     this.dbShowing.info().then(function (info) {
-      //console.log(info);
+      console.log(info);
     });
     this.assess = null;
     this.complex = null;

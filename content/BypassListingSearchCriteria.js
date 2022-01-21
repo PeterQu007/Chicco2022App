@@ -1,10 +1,9 @@
 //Targe Tab3//4/5_1_2 ML Default Spreadsheet View
 
 //https://bcres.paragonrels.com/ParagonLS/Search/Property.mvc/Index/2/?savedSearchID=1781753&searchID=tab3_1
-window.g_urlCountAction = '/ParagonLS/Search/Property.mvc/Count/0';
+window.g_urlCountAction = "/ParagonLS/Search/Property.mvc/Count/0";
 
 (function (elementExample, Object, window) {
-
   function createIDLSetWrapper(key, nativeSet, nativeGet) {
     return function (newValue) {
       var oldValue = this.getAttribute(key);
@@ -18,35 +17,47 @@ window.g_urlCountAction = '/ParagonLS/Search/Property.mvc/Count/0';
   }
 
   var ownProps = Object.getOwnPropertyNames(window);
-  for (var i = 0, len = ownProps.length | 0, key; i < len; i = i + 1 | 0) {
+  for (var i = 0, len = ownProps.length | 0, key; i < len; i = (i + 1) | 0) {
     key = ownProps[i];
-    if (/^HTMLInputElement$/.test(key) && window.hasOwnProperty(key) && !window.propertyIsEnumerable(key) && typeof window[key] === "function")(function () {
-      var oldDescriptors = Object.getOwnPropertyDescriptors(window[key].prototype);
-      var keys = Object.keys(oldDescriptors);
-      var newDescriptors = {};
-      console.log(keys);
+    if (
+      /^HTMLInputElement$/.test(key) &&
+      window.hasOwnProperty(key) &&
+      !window.propertyIsEnumerable(key) &&
+      typeof window[key] === "function"
+    )
+      (function () {
+        var oldDescriptors = Object.getOwnPropertyDescriptors(
+          window[key].prototype
+        );
+        var keys = Object.keys(oldDescriptors);
+        var newDescriptors = {};
+        console.log(keys);
 
-      for (var i = 0, len = keys.length | 0, prop, description; i < len; i = i + 1 | 0) {
-        prop = keys[i];
-        description = oldDescriptors[prop];
-        if (
-          prop !== "nonce" && // supposed to be secret and hidden from CSS
-          (!prop.startsWith("on") || elementExample[prop] !== null) && // screen out event listeners
-          typeof description.set === "function" && // ensure that this property has a descriptor
-          description.set.toString().indexOf("[native code]") !== -1 // ensure that we have not already processed to this element
-        ) newDescriptors[prop] = {
-          configurable: true,
-          enumerable: true,
-          get: description.get, // do not modify the original getter
-          set: createIDLSetWrapper(prop, description.set, description.get)
-        };
-      }
+        for (
+          var i = 0, len = keys.length | 0, prop, description;
+          i < len;
+          i = (i + 1) | 0
+        ) {
+          prop = keys[i];
+          description = oldDescriptors[prop];
+          if (
+            prop !== "nonce" && // supposed to be secret and hidden from CSS
+            (!prop.startsWith("on") || elementExample[prop] !== null) && // screen out event listeners
+            typeof description.set === "function" && // ensure that this property has a descriptor
+            description.set.toString().indexOf("[native code]") !== -1 // ensure that we have not already processed to this element
+          )
+            newDescriptors[prop] = {
+              configurable: true,
+              enumerable: true,
+              get: description.get, // do not modify the original getter
+              set: createIDLSetWrapper(prop, description.set, description.get),
+            };
+        }
 
-      // Finally apply the wrappers
-      Object.defineProperties(window[key].prototype, newDescriptors);
-    })();
+        // Finally apply the wrappers
+        Object.defineProperties(window[key].prototype, newDescriptors);
+      })();
   }
-
 })(document.firstElementChild, Object, window);
 
 $(function () {
@@ -60,7 +71,7 @@ $(function () {
   var curve = {
     priceRange: [0],
     listingCount: [0],
-    testControlCount: []
+    testControlCount: [],
   };
   var priceRange;
   var listingCount;
@@ -70,7 +81,7 @@ $(function () {
   var nextLowPrice = 0;
 
   //remove inputCountResult ReadOnly Attr
-  inputCountResult.removeAttr('readonly');
+  inputCountResult.removeAttr("readonly");
   //inputCountResult.attr('value', 'Counting...');
   btnCount.click();
 
@@ -139,7 +150,7 @@ $(function () {
     );
 
     if (!cmaIDNumber) {
-      alert('Select a CMA Number!');
+      alert("Select a CMA Number!");
       return;
     }
 
@@ -157,6 +168,8 @@ $(function () {
         "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/dbAddCMACriteria.php";
     }
 
+    ajax_url = $fx.getPIDAjaxUrl() + "dbAddCMACriteria.php";
+
     $.ajax({
       url: ajax_url,
       method: "post",
@@ -172,7 +185,7 @@ $(function () {
 
   $("#mls_helper_first_criteria").on("click", async (e) => {
     console.log(e);
-    console.log('first clicked');
+    console.log("first clicked");
     let highPrice = $("#f_5_High__1-2-3-4-5");
     let lowPrice = $("#f_5_Low__1-2-3-4-5");
     let lowPrice2 = $("#f_5_Low_1__1-2-3-4-5");
@@ -187,7 +200,7 @@ $(function () {
       lowPrice is set manually
       highPrice is indefinite
     */
-    highPrice.val('');
+    highPrice.val("");
     iCountTotal = await $.focusFx.searchFormCount();
     iCount = iCountTotal;
     if (iCountTotal <= 1500) {
@@ -198,7 +211,8 @@ $(function () {
     } else {
       console.group();
       iTestControl = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-      highPriceInitial = parseInt(lowPrice.val() || 0) + 500 * (highPriceInitial / 500);
+      highPriceInitial =
+        parseInt(lowPrice.val() || 0) + 500 * (highPriceInitial / 500);
       while (iCountTotal > 1500 && (iCount < 1000 || iCount > 1500)) {
         highPriceInitial = Math.floor(highPriceInitial / 10) * 10;
         highPrice.val(highPriceInitial);
@@ -206,9 +220,13 @@ $(function () {
         iCount = parseInt(iCount);
         points.push({
           x: highPriceInitial,
-          y: iCount
+          y: iCount,
         });
-        console.log(`LowPrice: ${lowPrice.val()} - HighPrice: ${highPriceInitial}`, " | Count: ", iCount);
+        console.log(
+          `LowPrice: ${lowPrice.val()} - HighPrice: ${highPriceInitial}`,
+          " | Count: ",
+          iCount
+        );
         // if (points.length === 2) {
         //   let y_for_1500 = 1500.00;
         //   let x_for_1500 = (y_for_1500 - points[1].y) * (points[0].x - points[1].x) / (points[0].y - points[1].y) + points[1].x;
@@ -262,8 +280,8 @@ $(function () {
       console.groupEnd();
     }
 
-    $(".CountBtn").removeAttr('disable');
-    $('.SearchBtn').removeAttr('disable');
+    $(".CountBtn").removeAttr("disable");
+    $(".SearchBtn").removeAttr("disable");
     console.log(inputCountResult.val());
     console.log(iCount);
 
@@ -272,11 +290,10 @@ $(function () {
     listingCount = iCount;
 
     console.log(curve);
-
   }); //mls_helper_first_criteria
 
   $("#mls_helper_price_curve").on("click", async (e) => {
-    console.log('curve clicked');
+    console.log("curve clicked");
     let highPrice = $("#f_5_High__1-2-3-4-5");
     let lowPrice = $("#f_5_Low__1-2-3-4-5");
     let lowPrice2 = $("#f_5_Low_1__1-2-3-4-5");
@@ -287,8 +304,8 @@ $(function () {
     let iTestControl = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     console.group();
 
-    lowPrice.val('');
-    highPrice.val('');
+    lowPrice.val("");
+    highPrice.val("");
     nextLowPrice = 0;
 
     do {
@@ -296,14 +313,14 @@ $(function () {
         lowPrice is set manually
         highPrice is indefinite
       */
-      highPrice.val('');
+      highPrice.val("");
       lowPrice.val(nextLowPrice);
       iCountTotal = parseInt(await $.focusFx.searchFormCount());
       iCount = iCountTotal;
       if (iCountTotal <= 1500) {
         lastCount = true;
-        $(".CountBtn").removeAttr('disable');
-        $('.SearchBtn').removeAttr('disable');
+        $(".CountBtn").removeAttr("disable");
+        $(".SearchBtn").removeAttr("disable");
         console.log(inputCountResult.val());
         console.log(iCount);
 
@@ -316,14 +333,19 @@ $(function () {
       } else {
         console.group();
         iTestControl = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        highPriceInitial = parseInt(lowPrice.val() || 0) + 500 * (highPriceInitial / 500);
-        lowPrice2.val('001');
+        highPriceInitial =
+          parseInt(lowPrice.val() || 0) + 500 * (highPriceInitial / 500);
+        lowPrice2.val("001");
         while (iCountTotal > 1500 && (iCount < 1000 || iCount > 1500)) {
           highPriceInitial = Math.floor(highPriceInitial / 10) * 10;
           highPrice.val(highPriceInitial);
           iCount = await $.focusFx.searchFormCount();
           iCount = parseInt(iCount);
-          console.log(`LowPrice: ${lowPrice.val()} - HighPrice: ${highPriceInitial}`, " | Count: ", iCount);
+          console.log(
+            `LowPrice: ${lowPrice.val()} - HighPrice: ${highPriceInitial}`,
+            " | Count: ",
+            iCount
+          );
           nextLowPrice = highPrice.val();
           switch (true) {
             case iCount < 200:
@@ -363,8 +385,8 @@ $(function () {
               highPriceInitial *= 0.85;
               break;
             default:
-              $(".CountBtn").removeAttr('disable');
-              $('.SearchBtn').removeAttr('disable');
+              $(".CountBtn").removeAttr("disable");
+              $(".SearchBtn").removeAttr("disable");
               console.log(inputCountResult.val());
               console.log(iCount);
 
@@ -378,15 +400,12 @@ $(function () {
         }
         console.groupEnd();
       }
-
-    } while (!lastCount)
-
+    } while (!lastCount);
   });
-
 
   $("#mls_helper_next_criteria").on("click", async (e) => {
     console.log(e);
-    console.log('next clicked');
+    console.log("next clicked");
     let highPrice = $("#f_5_High__1-2-3-4-5");
     let lowPrice = $("#f_5_Low__1-2-3-4-5");
     let lowPrice2 = $("#f_5_Low_1__1-2-3-4-5");
@@ -399,9 +418,8 @@ $(function () {
     let lowPriceRange = curve.priceRange[priceRangePointer++];
     let highPriceRange = curve.priceRange[priceRangePointer];
 
-
     lowPrice.val(lowPriceRange);
-    lowPrice2.val('001');
+    lowPrice2.val("001");
     highPrice.val(highPriceRange);
     iCount = await $.focusFx.searchFormCount();
     iCount = parseInt(iCount);
@@ -505,7 +523,6 @@ $(function () {
   //   console.log('Price Distribution Curve: ', curve);
   // }); //id: mls_helper_next_criteria
 
-
   // $(".CountResultText").bind("input propertychange", (e) => {
   //   console.log('CountResult Changed');
   // });
@@ -529,21 +546,22 @@ $(function () {
     characterDataOldValue: true,
     childList: true,
     subtree: true,
-    attributeOldValue: true
+    attributeOldValue: true,
   };
 
   // Callback function to execute when mutations are observed
   const callback = function (mutationsList, observer) {
     // Use traditional 'for loops' for IE 11
     for (const mutation of mutationsList) {
-      if (mutation.type === 'childList') {
-        console.log('A child node has been added or removed.');
-      } else if (mutation.type === 'attributes') {
-        console.log('The ' + mutation.attributeName + ' attribute was modified.');
-        console.log('The oldValue is ' + mutation.oldValue);
-        console.log($('#CountResult').val());
-        let iCount = parseInt($('#CountResult').val());
-
+      if (mutation.type === "childList") {
+        console.log("A child node has been added or removed.");
+      } else if (mutation.type === "attributes") {
+        console.log(
+          "The " + mutation.attributeName + " attribute was modified."
+        );
+        console.log("The oldValue is " + mutation.oldValue);
+        console.log($("#CountResult").val());
+        let iCount = parseInt($("#CountResult").val());
       }
     }
   };

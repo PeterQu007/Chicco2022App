@@ -10,13 +10,15 @@
 //Function: Computing Square Feet Price Summary From the Spreadsheet Table
 
 import uiSummaryTable from "../assets/scripts/ui/uiSummaryTable.js";
-import addressInfo from "../assets/scripts/modules/AddressInfo";
+import addressInfo from "../assets/scripts/modules/AddressInfoExport.js";
 // import test from "./modules/test.js";
 //import * as math from "../assets/lib/mathjs/math.min.js";
-import Assess from "./modules/Assessment";
-import Complex from "./modules/Complex";
+// import Assess from "./modules/Assessment";
+// import Complex from "./modules/Complex";
+import Assess from "../assets/scripts/modules/Assessment";
+import Complex from "../assets/scripts/modules/Complex";
 
-var $fx = L$(); //add library module
+var $fx = L$(); //// add library module
 
 var computeSFPrices = {
   init: function () {
@@ -57,11 +59,13 @@ var computeSFPrices = {
       //// Load Active Subject Properties
       // this.$LoadSubject.click();
       // if not the correct table, skip all events
-      let searchViewName = $(this.tabID, top.document).find("[rel='" + this.searchTabID + "']").text();
+      let searchViewName = $(this.tabID, top.document)
+        .find("[rel='" + this.searchTabID + "']")
+        .text();
       // Update WP View :: update community and neighborhood to wordpress
       // Listing Extra Info:: get bca, complex... extra info
       let listingExtraInfo = "Listing Extra Info";
-      let updateWPViewName = 'Update WP View';
+      let updateWPViewName = "Update WP View";
       if (searchViewName.indexOf(listingExtraInfo) > -1) {
         ////HOOK UP EVENTS:
         this.onTaxSearch(); ////TAX.SEARCH EVENT
@@ -243,7 +247,7 @@ var computeSFPrices = {
             listingPricePSF = Number(
               Number(
                 col14_Price[col14_Price.length - 1] /
-                col22_FloorArea[col22_FloorArea.length - 1]
+                  col22_FloorArea[col22_FloorArea.length - 1]
               ).toFixed(2)
             );
             sumPSFListedPrice += listingPricePSF;
@@ -375,7 +379,6 @@ var computeSFPrices = {
     var tableLoading = document.querySelector("#grid tbody"); ////MONITOR THE #grid.tbody, CHECK THE LISTING RECORDS
     var $mutationObserver = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
-
         var x = $("table#grid tbody"); //Spreadsheet table body
         var y = $("table.ui-jqgrid-htable thead"); //Spreadsheet Table header
         var rows = x.children("tr");
@@ -412,10 +415,8 @@ var computeSFPrices = {
           var x0 = $("div#dialogStats", parent.document); ////LOOK FOR THE SUMMARY.SECTION FOR ADDING EXTRA THIS.uiTable
           self.uiTable.showUI(x0);
           self.table.length = 0;
-
         }
-      })
-
+      });
     });
 
     $mutationObserver.observe(tableLoading, {
@@ -533,15 +534,16 @@ var computeSFPrices = {
         }
         ////SEND TAX SEARCH COMMAND TO BACKGROUND SCRIPT
         chrome.storage.local.set({
-          PID: pid
+          PID: pid,
         });
         chrome.storage.local.get("PID", function (result) {
           //console.log(">>>PID saved for tax search: ", result.PID);
           //////////////////////////////////////////////////////////
           //SEND OUT SEARCH TAX COMMAND
-          chrome.runtime.sendMessage({
+          chrome.runtime.sendMessage(
+            {
               from: "SpreadSheet",
-              todo: "taxSearch"
+              todo: "taxSearch",
             },
             function (response) {
               console.log("SpreadSheet got tax response:", response);
@@ -567,7 +569,6 @@ var computeSFPrices = {
       }
     }
   },
-
 
   updateAssess: function () {
     ////ON TAX.SEARCH EVENT, CHROME.STORAGE GET A NEW.VALUE CONTAINS 'assess' AND 'ForSpreadSheet'
@@ -628,26 +629,25 @@ var computeSFPrices = {
           var c = "";
           var newPID = "";
           // create assess object
-          let
-            assessInfo = {
-              landValue: null,
-              improvementValue: null,
-              assessID: null,
-              totalValue: null,
-              pid: null,
-              taxYear: null,
-              address: null,
-              legal: null,
-              taxRollNumber: null,
-              grossTaxes: null,
-              planNum: null,
-              houseType: null,
-              lotSize: null,
-              bcaDataUpdateDate: null,
-              bcaDescription: null,
-              floorArea: null,
-              bcaFloorArea: null
-            };
+          let assessInfo = {
+            landValue: null,
+            improvementValue: null,
+            assessID: null,
+            totalValue: null,
+            pid: null,
+            taxYear: null,
+            address: null,
+            legal: null,
+            taxRollNumber: null,
+            grossTaxes: null,
+            planNum: null,
+            houseType: null,
+            lotSize: null,
+            bcaDataUpdateDate: null,
+            bcaDescription: null,
+            floorArea: null,
+            bcaFloorArea: null,
+          };
 
           //only keep numbers and dash character
           for (var n = 0; n < checkPID.length; n++) {
@@ -793,8 +793,7 @@ var computeSFPrices = {
               self.table[i][9] = "NPN"; ////UPDATE THE TABLE CELL FOR PLAN.NUMBER
               self.table[i][16] =
                 /*planNum need to get from legalDescription */
-                planNum +
-                aInfo.addressID; //complexID
+                planNum + aInfo.addressID; //complexID
             }
 
             self.table[i][14] = aInfo.houseType;
@@ -893,7 +892,7 @@ var computeSFPrices = {
               self.updateSpreadsheet();
               // self.postAssessInfo(); // post assess to mySQL for detached properties
               let assess = new Assess();
-              assess.postAssessInfos(self.assessInfos);
+              assess.postAssessInfos(self.assessInfos, $fx);
             }
             continue;
           }
@@ -945,15 +944,18 @@ var computeSFPrices = {
             TitleToLand: fields[self.cols.TitleToLand].textContent,
             Units: fields[self.cols.Units].textContent,
             Storeys: fields[self.cols.Storeys].textContent,
-            BylawRentalRestriction: fields[self.cols.BylawRentalRestriction].textContent,
+            BylawRentalRestriction:
+              fields[self.cols.BylawRentalRestriction].textContent,
             FloodPlain: fields[self.cols.FloodPlain].textContent,
             Zoning: fields[self.cols.Zoning].textContent,
             BylawRestriction: fields[self.cols.BylawRestriction].textContent,
             Parking: fields[self.cols.Parking].textContent,
             ManagementCoName: fields[self.cols.ManagementCoName].textContent,
             ManagementCoPhone: fields[self.cols.ManagementCoPhone].textContent,
-            BylawPetRestriction: fields[self.cols.BylawPetRestriction].textContent,
-            BylawAgeRestriction: fields[self.cols.BylawAgeRestriction].textContent,
+            BylawPetRestriction:
+              fields[self.cols.BylawPetRestriction].textContent,
+            BylawAgeRestriction:
+              fields[self.cols.BylawAgeRestriction].textContent,
             NeighborhoodCode: fields[self.cols.NeighborhoodCode].textContent,
             Region: fields[self.cols.Region].textContent,
             Province: fields[self.cols.Province].textContent,
@@ -962,7 +964,8 @@ var computeSFPrices = {
             Amenities: fields[self.cols.Amenities].textContent,
             SiteInfluences: fields[self.cols.SiteInfluences].textContent,
             StrataFeePSF: fields[self.cols.StrataFeePSF].textContent,
-            MaintenanceFeeInclude: fields[self.cols.MaintenanceFeeInclude].textContent,
+            MaintenanceFeeInclude:
+              fields[self.cols.MaintenanceFeeInclude].textContent,
             AddedDate: $fx.formatDate_Y_m_d(new Date()),
           };
           self.complexInfos.push(complexInfo);
@@ -971,11 +974,11 @@ var computeSFPrices = {
         // console.log("complexSearch done::", self.complexInfos);
         // self.postComplexInfo();
         let complex = new Complex();
-        complex.postComplexInfos(this.complexInfos);
+        complex.postComplexInfos(this.complexInfos, $fx);
         // send strata property assess infos to mySql Table
         // self.postAssessInfo();
         let assess = new Assess();
-        assess.postAssessInfos(self.assessInfos);
+        assess.postAssessInfos(self.assessInfos, $fx);
       }
     }
   },
@@ -1013,8 +1016,8 @@ var computeSFPrices = {
     var aInfo = null;
     var addressLink = $(
       '<a id="addressLink" target="_blank" href="https://www.google.com/search?q=Google+tutorial+create+link">' +
-      "Google tutorial create link" +
-      "</a> "
+        "Google tutorial create link" +
+        "</a> "
     );
     var addressText = "";
     var i;
@@ -1084,8 +1087,8 @@ var computeSFPrices = {
       );
       var addressLink = $(
         '<a id="addressLink" target="_blank" href="https://www.google.com/search?q=Google+tutorial+create+link">' +
-        "Google tutorial create link" +
-        "</a> "
+          "Google tutorial create link" +
+          "</a> "
       );
       addressLink.attr("href", aInfo.googleSearchLink);
       addressLink.text(aInfo.formalAddress);
@@ -1160,7 +1163,9 @@ var computeSFPrices = {
     self.uiTable.render(3);
 
     //table data to background
-    let btnSendTable = self.uiTable.$UITable[0].querySelector("#mls-send-table-to-background");
+    let btnSendTable = self.uiTable.$UITable[0].querySelector(
+      "#mls-send-table-to-background"
+    );
     btnSendTable.click();
   },
   /////////////////////////////////////////////////////////////////////////////
@@ -1168,11 +1173,12 @@ var computeSFPrices = {
   /////////////////////////////////////////////////////////////////////////////
 
   addLock: function (tabID) {
-    chrome.runtime.sendMessage({
+    chrome.runtime.sendMessage(
+      {
         from: "SpreadSheet",
         todo: "addLock",
         tabID,
-        tabID
+        tabID,
       },
       function (response) {
         console.log("SpreadSheet got tax response:", response);

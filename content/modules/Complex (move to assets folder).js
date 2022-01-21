@@ -1,10 +1,12 @@
 // Complex information <=> mySQL table wp_pid_complex
 
-'use strict';
+"use strict";
 
-const DATA_COMPLEX_API_URL_LOCAL = "https://pidrealty4.local/wp-content/themes/Realhomes-child-3/db/dataComplexInfo.php";
+const DATA_COMPLEX_API_URL_LOCAL =
+  "https://pidrealty4.local/wp-content/themes/Realhomes-child-3/db/dataComplexInfo.php";
 // const DATA_COMPLEX_API_URL_LOCAL_OBSOLETE = "http://localhost/pidrealty4/wp-content/themes/Realhomes-child-3/db/dataComplexInfo.php";
-const DATA_COMPLEX_API_URL_LIVE = "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/dataComplexInfo.php";
+const DATA_COMPLEX_API_URL_LIVE =
+  "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/dataComplexInfo.php";
 
 class Complex {
   constructor() {
@@ -12,8 +14,7 @@ class Complex {
   }
 
   // Insert or Update the complex information to mySQL Table WP_PID_COMPLEX
-  postComplexInfos(complexInfos) {
-    const $fx = L$();
+  postComplexInfos(complexInfos, $fx) {
     const uniqueComplexInfos = $fx.normalizeComplexInfos(complexInfos);
     const urlLocationOptionLocal = $("#pid_local", top.document);
     const urlLocation = urlLocationOptionLocal.prop("checked");
@@ -29,7 +30,7 @@ class Complex {
       url: ajax_url,
       method: "post",
       data: {
-        complexInfos: uniqueComplexInfos
+        complexInfos: uniqueComplexInfos,
       },
       success: function (res) {
         console.log("ajax::", res);
@@ -40,9 +41,6 @@ class Complex {
       },
     });
   }
-
-
 }
-
 
 export default Complex;

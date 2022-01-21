@@ -716,6 +716,34 @@
       });
       return uniqueComplexInfos;
     },
+
+    getPIDAjaxUrl: function () {
+      // location is local(pidrealty4.local), synology(pidrealty.ca), remote(pidhomes.ca)
+      // 2022/01/19
+      let urlLocationOptionLocal = $("#pid_local", top.document);
+      let urlLocationOptionSynology = $("#pid_synology", top.document);
+      let urlLocationRemote = $("#pid_remote", top.document);
+      let ajax_url = "";
+
+      switch (true) {
+        case urlLocationOptionLocal.prop("checked"):
+          // ajax_url =
+          //   "http://localhost/pidrealty4/wp-content/themes/Realhomes-child-3/db/";
+          ajax_url =
+            "https://pidrealty4.local/wp-content/themes/realhomes-child-3/db/";
+          break;
+        case urlLocationOptionSynology.prop("checked"):
+          ajax_url =
+            "https://pidrealty.ca/wp-content/themes/realhomes-child-3/db/";
+          break;
+        case urlLocationRemote.pro("checked"):
+          ajax_url =
+            "https://cn.pidhomes.ca/wp-content/themes/realhomes-child-3/db/";
+          break;
+      }
+
+      return ajax_url;
+    },
   };
 
   Library.init = function (houseType) {

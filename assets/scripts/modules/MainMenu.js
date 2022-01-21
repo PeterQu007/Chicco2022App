@@ -1,6 +1,8 @@
 //define the paragon mls Main Menu Class
 //store the frequently used menu function links in the class
 
+var $fx = L$();
+
 class MainMenu {
   constructor() {
     this.appBanner = $("#app_banner");
@@ -24,8 +26,10 @@ class MainMenu {
     //insert remote/local radio
     this.radioSubjectLoadingLink = $(`<div class = "languagebox">
         <span class="mls-vertial-divider">|</span>
-        <input type="radio" class = "pid_subject_property_options" id='pid_local' name="LoadSubjects" value="local" checked='checked' />
+        <input type="radio" class = "pid_subject_property_options" id='pid_local' name="LoadSubjects" value="local" />
         <label for='pid_local'>Local&nbsp</label>
+        <input type="radio" class = "pid_subject_property_options" id='pid_synology' name="LoadSubjects" value="synology" checked='checked' />
+        <label for='pid_synology'>Synology&nbsp</label>
         <input type="radio" class = "pid_subject_property_options" id='pid_remote; ?>' name="LoadSubjects" value="remote" />
         <label for='pid_remote'>Remote&nbsp</label>
       </div>`);
@@ -175,6 +179,8 @@ class MainMenu {
       ajax_url =
         "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/loadSubjectData.php";
     }
+
+    ajax_url = $fx.getPIDAjaxUrl() + "loadSubjectData.php";
 
     $.ajax({
       url: ajax_url,

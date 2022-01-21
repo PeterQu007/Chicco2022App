@@ -20,7 +20,7 @@ export default class UISummaryTable {
             low: "Low",
             ave: "Ave",
             med: "Med",
-            count: "Count"
+            count: "Count",
           },
           values: {
             name: "",
@@ -28,8 +28,8 @@ export default class UISummaryTable {
             low: 0,
             ave: 0,
             med: 0,
-            count: 0
-          }
+            count: 0,
+          },
         },
         {
           id: "sumBoxPanel1",
@@ -39,15 +39,15 @@ export default class UISummaryTable {
             low: "LowAskingPricePSF",
             ave: "AverageAskingPricePSF",
             med: "MedianAskingPricePSF",
-            count: "TotalAskingPSF"
+            count: "TotalAskingPSF",
           },
           values: {
             high: 0,
             low: 0,
             ave: 0,
             med: 0,
-            count: 0
-          }
+            count: 0,
+          },
         },
         {
           id: "sumBoxPanel2",
@@ -57,19 +57,20 @@ export default class UISummaryTable {
             low: "LowSoldPricePSF",
             ave: "AverageSoldPricePSF",
             med: "MedianSoldPrice",
-            count: "TotalSoldPSF"
+            count: "TotalSoldPSF",
           },
           values: {
             high: 0,
             low: 0,
             ave: 0,
             med: 0,
-            count: 0
-          }
-        }
-      ]
+            count: 0,
+          },
+        },
+      ],
     };
-    this.$UITable = $(`<div id = "SummaryFunctionBox" style = 'top: 30px; left: 850px; position: absolute'>
+    this.$UITable =
+      $(`<div id = "SummaryFunctionBox" style = 'top: 30px; left: 850px; position: absolute'>
                             <div id = "sumButtonContainer" style = "z-index: 999" ></div>
                             <div id = "sumPanelContainer" style = 'top: 0px; left: 100px; position: absolute'></div>
                             <div id = "sumPanelBCAChangeContainer" style = 'top: 0px; left: 360px; position: absolute'></div>
@@ -109,7 +110,7 @@ export default class UISummaryTable {
       high: sumValues.length == 0 ? 0 : Math.max(...sumValues).toFixed(0),
       low: sumValues.length == 0 ? 0 : Math.min(...sumValues).toFixed(0),
       ave: sumValues.length == 0 ? 0 : $fx.mean(sumValues),
-      med: sumValues.length == 0 ? 0 : $fx.median(sumValues)
+      med: sumValues.length == 0 ? 0 : $fx.median(sumValues),
     };
     for (var key in sumValues) {
       this.setSumValue(id, key, sumValues[key], unit);
@@ -121,9 +122,8 @@ export default class UISummaryTable {
     switch (id) {
       case 1:
         this.state.panels[0].labels.name = "$PSF";
-        const panelContainer = parent.document.querySelector(
-          "#sumPanelContainer"
-        );
+        const panelContainer =
+          parent.document.querySelector("#sumPanelContainer");
         ReactDOM.render(
           <SumBoxPanels
             key={id}
