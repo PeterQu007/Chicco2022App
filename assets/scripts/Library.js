@@ -213,11 +213,46 @@
     },
 
     getSearchTabID: function (str = "") {
+      // 获取第三级tabID
       //"https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/0?&Address=&City=&State=&Zip=&MapZoom=15&
       //CenterLat=49.1592529817306&CenterLng=-122.799000899396&SearchCount=11&IsFromSearch=true&tabName=tab4_1_1"
       let searchTabIDRegex = /tab\d_\d_\d/g;
       let src, start, end;
+      // 测试三种可能的网页地址
+      if (str == "") {
+        uri1 = window.frameElement.src;
+        if (searchTabIDRegex.test(uri1)) {
+          src = uri1.match(searchTabIDRegex)[0];
+          return `#${src}`;
+        }
+        uri2 = window.parent.frameElement.src;
+        if (searchTabIDRegex.test(uri2)) {
+          src = uri2.match(searchTabIDRegex)[0];
+          return `#${src}`;
+        }
+        uri3 = parent.document.URL;
+        if (searchTabIDRegex.test(uri3)) {
+          src = uri3.match(searchTabIDRegex)[0];
+          return `#${src}`;
+        }
+        return "#";
+      } else {
+        if (searchTabIDRegex.test(str)) {
+          src = str.match(searchTabIDRegex)[0];
+          return "#" + src;
+        } else {
+          return "#";
+        }
+      }
+    },
 
+    getTabID3: function (str = "") {
+      // 获取第三级tabID
+      //"https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/0?&Address=&City=&State=&Zip=&MapZoom=15&
+      //CenterLat=49.1592529817306&CenterLng=-122.799000899396&SearchCount=11&IsFromSearch=true&tabName=tab4_1_1"
+      let searchTabIDRegex = /tab\d_\d_\d/g;
+      let src;
+      // 测试三种可能的网页地址
       if (str == "") {
         uri1 = window.frameElement.src;
         if (searchTabIDRegex.test(uri1)) {
@@ -246,11 +281,12 @@
     },
 
     getTabID: function (str = "") {
+      // 获取第一级tabID
       // does not work for uri:
       //"https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/0?&Address=&City=&State=&Zip=&MapZoom=15&
       //CenterLat=49.1592529817306&CenterLng=-122.799000899396&SearchCount=11&IsFromSearch=true&tabName=tab4_1_1"
       let tabRegex = /tabName=tab(\d_)+\d$/g;
-      let tabIDRegex = /tab\d/g;
+      let tabIDRegex = /tab\d/g; ///第一级tab regex
       let src, start, end;
 
       if (str == "") {
@@ -302,6 +338,42 @@
         }
       }
       return "#" + src; //add id sign # as prefix
+    },
+
+    getTabID2: function (str = "") {
+      // 获取第二级tabID
+      // does not work for uri:
+      //"https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/0?&Address=&City=&State=&Zip=&MapZoom=15&
+      //CenterLat=49.1592529817306&CenterLng=-122.799000899396&SearchCount=11&IsFromSearch=true&tabName=tab4_1_1"
+      let tabIDRegex = /tab\d_\d/g; // 第二级tab Regex
+      let TabID3Regex = /tab\d_\d_\d/g; // 第三级tab Regex
+      let src, start, end;
+
+      if (str == "") {
+        uri1 = window.frameElement.src;
+        if (tabIDRegex.test(uri1)) {
+          src = uri1.match(tabIDRegex)[0];
+          return `#${src}`;
+        }
+        uri2 = window.parent.frameElement.src;
+        if (tabIDRegex.test(uri2)) {
+          src = uri2.match(tabIDRegex)[0];
+          return `#${src}`;
+        }
+        uri3 = parent.document.URL;
+        if (tabIDRegex.test(uri3)) {
+          src = uri3.match(tabIDRegex)[0];
+          return `#${src}`;
+        }
+        return "#";
+      } else {
+        if (tabIDRegex.test(str)) {
+          src = str.match(tabIDRegex)[0];
+          return "#" + src;
+        } else {
+          return "#";
+        }
+      }
     },
 
     getListingID: function (str) {

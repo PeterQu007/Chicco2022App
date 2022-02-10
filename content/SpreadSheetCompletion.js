@@ -17,14 +17,32 @@
 var $fx = L$(); //// add library module
 
 var computeSFPrices = {
+  /// 程序入口
   init: function () {
     console.log("Spreadsheet Document URL: ", document.URL); ///THIS URL CONTAINS TAB.ID
 
-    this.tabID = $fx.getTabID(document.URL); ///LOOK FOR TAB.ID PREFIXED WITH # ID.SIGN
-    this.searchTabID = $fx.getSearchTabID(document.URL);
+    this.tabID = $fx.getTabID(document.URL); /// 获取第一季tab的ID, 例如#tab4
+    this.tabID2 = $fx.getTabID2(document.URL); /// 获取第二级tab的ID, 例如#tab4_1
+    this.searchTabID = $fx.getSearchTabID(document.URL); /// 第三级tab的ID, 例如#tab4_1_2, #tab4_2_2
+    this.tabID3 = this.searchTabID; /// 获取第三级tab的ID
+
+    /// 保存第一级框架网页元素
+    this.elementContainerLevel1 = top.document.getElementById(
+      this.tabID.replace("#", "")
+    ); // 这是顶层Tab的框架页
+    /// 保存第二级tab的div容器元素
+    this.elementContainerLevel2 = top.document.getElementById(
+      this.tabID2.replace("#", "")
+    ); // 这是本元素的父级Div容器元素, 取得第二级tab4_1的Div容器元素
+    /// 保存第三级(即本级)tab的网页元素
+    this.elementContainerLevel3 = top.document.getElementById(
+      this.tabID3.replace("#", "")
+    ); // 这是本元素的tab容器元素, 取得第三级tab4_1的Div容器元素
+
     this.tabNo = parseInt(this.tabID.replace("#tab", "")); ///LOOK FOR TAB.NO
     var x = $("ul#tab-bg", top.document); ///find the top tab panel
     var y = x.children("li")[this.tabNo];
+    /// 第一层的tab名称, 是按照物业种类的搜索分类, 例如: Residential Detached, Residential Attached
     this.tabTitle = $(y).children().find("span").text().trim(); ///LOOK FOR TAB.TITLE
     console.warn(
       "tabID, tabNo, tabTitle",
@@ -33,12 +51,14 @@ var computeSFPrices = {
       this.tabTitle
     );
     //this.setCols(this.tabTitle); ///COLUMNS FROM DIFFERENT SPREADSHEET.TABLES
+    /// 根据物业的种类不同, 独立屋, 非独立屋的数据字段有区别
     this.cols = $fx.setCols(this.tabTitle);
     // this.uiTable.tabTitle = this.tabTitle; ///SUMMARY.TABLE FOR AVERAGE SQUARE.FEET.PRICES
     ///BC.TAX.SEARCH IS SET TO TAB1, ITS SEARCH.RESULT ALSO USE SPREADSHEET.VIEW, SHOULD NOT BE INCLUDED HERE
+    /// 选择适用本程序的Paragon页面
     if (this.tabID >= "#tab2") {
       ///EXCLUDE #TAB1: BC.TAX.SEARCH.RESULTS
-      this.addLock(this.tabID);
+      this.addLock(this.tabID); /// 锁定当前的搜索结果页面
       this.$tabContentContainer = $("div" + this.tabID, top.document);
       // this.$LoadSubject = $("#SubjectPropertySubmit", top.document);
 
@@ -59,7 +79,7 @@ var computeSFPrices = {
         .find("[rel='" + this.searchTabID + "']")
         .text();
       // Update WP View :: update community and neighborhood to wordpress
-      // Listing Extra Info:: get bca, complex... extra info
+      // 定制的报告模板 Listing Extra Info:: get bca, complex... extra info,
       let listingExtraInfo = "Listing Extra Info";
       let updateWPViewName = "Update WP View";
       if (searchViewName.indexOf(listingExtraInfo) > -1) {
@@ -83,17 +103,19 @@ var computeSFPrices = {
     }
     // this.uiTable.parent = this;
   },
-  ////PROPERTIES:
-  tabID: null,
+
+  /// 对象属性 PROPERTIES:
+  tabID: null, // 第一级(顶级)tabID, 带#, 例如#tab4, #tab5
+  tabID2: null, // 第二级tabID, 例如#tab4_1, #tab5_1
+  tabID3: null, // 第三级tabID, 例如#tab4_1_1, #tab4_1_2
   tabNo: 0,
   tabTitle: null,
-  // uiTable: new uiSummaryTable(this),
+  // uiTable: new uiSummaryTable(this), /// 本属性已经转移到了父级模块AddSFPriceSummaryBox.js
   $spreadSheet: null,
   $searchCount: null,
   $grid: null,
   $mutationObserver: null,
   recordCount: 0,
-  //recordPointer: 0,
   table: [], //for assessment search
   assessInfos: [], //for assess search
   rowNumber: [], //for table col 0 , keep the listing row number of spreadsheet
@@ -105,16 +127,21 @@ var computeSFPrices = {
   ),
   stopSearch: $("input#inputstopsearch", top.document),
   sumValues: [], // for extra summary panels
-  ////EVENTS:
+  elementContainerLevel1: null, // 保存第一级tab容器, 这个元素的可见性, 会影响或者决定本元素的可见性
+  elementContainerLevel2: null, // 保存第二级tab容器, 这个原始的可见性, 会影响或者决定本元素的可见性
+  elementContainerLevel3: null, // 保存第三级tab容器, 这个原始的可见性, 会影响或者决定本元素的可见性
+
+  /// 对象时间 EVENTS:
   // onConnect() {
-  //   // chrome.runtime.onConnect.addListener(function(port) {
-  //   //   port.onMessage.addListener(function(msg) {
-  //   //     console.info("msg", msg.counter);
-  //   //     port.postMessage({ counter: msg.counter + 1 });
-  //   //   });
-  //   // });
+  // chrome.runtime.onConnect.addListener(function(port) {
+  //   port.onMessage.addListener(function(msg) {
+  //     console.info("msg", msg.counter);
+  //     port.postMessage({ counter: msg.counter + 1 });
+  //   });
+  // });
   // },
 
+  /// 接受来自子级窗口的信息请求, 执行地税/评估数据搜索
   onPostMessage() {
     window.addEventListener("message", (event) => {
       // IMPORTANT: Check the origin of the data!
@@ -138,9 +165,11 @@ var computeSFPrices = {
     });
   },
 
+  /// 监控搜索结果数据表格的生成, 提取表格数据
   onMutation() {
-    ///AFTER THE SPREADSHEET.TABLE HAS BEEN FULLY LOADED TO THE FRONT.END
-    ///POPULATE this.table AND this.complexInfos
+    /// AFTER THE SPREADSHEET.TABLE HAS BEEN FULLY LOADED TO THE FRONT.END
+    /// 前端表格数据从服务器中传送完成后
+    /// 提取数据到属性的挂牌数据table和小区数据表 POPULATE this.table AND this.complexInfos
     var self = this;
     var tableLoading = document.querySelector("#grid tbody"); ///MONITOR THE #grid.tbody, CHECK THE LISTING RECORDS
 
@@ -153,6 +182,7 @@ var computeSFPrices = {
 
         var name = mutation.attributeName;
         var value = mutation.target.getAttribute(name);
+        /// 筛选表格节点元素
         if (
           mutation.type == "childList" &&
           mutation.target.tagName == "TBODY"
@@ -166,14 +196,15 @@ var computeSFPrices = {
           return;
         }
 
-        self.table.length = 0; ////INIT THIS.table
-        self.rowNumber.length = 0; ////INIT THIS.rowNumber
+        /// 搜索结果已经传输完毕
+        self.table.length = 0; ///INIT THIS.table
+        self.rowNumber.length = 0; ///INIT THIS.rowNumber
 
         if (
           x.children("tr").length - 1 == self.recordCount ||
           x.children("tr").length - 1 == 250
         ) {
-          ////THE TABLE #grid HAS BEEN FULLY LOADED TO THE FRONT.ENT
+          ///THE TABLE #grid HAS BEEN FULLY LOADED TO THE FRONT.ENT
 
           //console.log("reach the bottom of the TABLE");
           self.recordCount = parseInt(self.$searchCount.text());
@@ -210,10 +241,10 @@ var computeSFPrices = {
           var countActiveListing = 0; ////KEEP THE COUNT OF ACTIVE LISTINGS
           var soldPricePSF; //keep the sold price per square feet
           var listingPricePSF; //keep the listing price per square feet
-          var strataFeePSF; ////KEEP THE CALCULATED STRATA FEE PER SQUARE FEET
-          var status; ////KEEP THE LISTING STATUS
+          var strataFeePSF; ///KEEP THE CALCULATED STRATA FEE PER SQUARE FEET
+          var status; ///KEEP THE LISTING STATUS
           i = 0;
-          ////modify the table header
+          ///modify the table header
           var headerCells = $(tableHeaderRow[0]).children("th");
           for (var j = 0; j <= headerCells.length; j++) {
             switch (j) {
@@ -295,14 +326,13 @@ var computeSFPrices = {
                 );
                 if (soldPricePSF > 0) {
                   countSoldListing++;
-                  col24_SoldPricePSF.push(soldPricePSF); ////SOLD.PRICE.PER.SQUARE.FEET
-                  sumPSFSoldPrice += soldPricePSF; ////TOTAL.SOLD.PRICE.PER.SQUARE.FEET
+                  col24_SoldPricePSF.push(soldPricePSF); ///SOLD.PRICE.PER.SQUARE.FEET
+                  sumPSFSoldPrice += soldPricePSF; ///TOTAL.SOLD.PRICE.PER.SQUARE.FEET
                 }
                 break;
             }
 
-            ////LOOK FOR PID FOR TAX.SEARCH
-            //self.recordPointer = i-1;
+            ///LOOK FOR PID FOR TAX.SEARCH
             var pid = $(rows[i]).children("td")[self.cols.PID].textContent;
             var complexName = $(rows[i]).children("td")[self.cols.ComplexName]
               .textContent;
@@ -315,17 +345,17 @@ var computeSFPrices = {
             var unitNo = "";
             var city = "";
             col31_PID.push(pid);
-            row.push(pid); ////COL 4: PID
+            row.push(pid); ///COL 4: PID
             col32_LandValue.push(0);
-            row.push(0); ////COL 5: LAND.VALUE
+            row.push(0); ///COL 5: LAND.VALUE
             col33_ImprovementValue.push(0);
-            row.push(0); ////COL 6: IMPROVEMENT.VALUE
+            row.push(0); ///COL 6: IMPROVEMENT.VALUE
             col34_TotalAssess.push(0);
-            row.push(0); ////COL 7: TOTAL.ASSESS
+            row.push(0); ///COL 7: TOTAL.ASSESS
             col35_ValueChange.push(0);
-            row.push(0); ////COL8: VALUE.CHANGE
+            row.push(0); ///COL8: VALUE.CHANGE
             col36_PlanNum.push("");
-            row.push(""); ////COL9: PLAN.NUM
+            row.push(""); ///COL9: PLAN.NUM
             row.push(false); //col 10 : taxSearch Sign
             row.push(lotSize); // col 11 : add lotSize for single house or land
             row.push(complexName); //col 12: for complex Name
@@ -333,11 +363,11 @@ var computeSFPrices = {
             row.push(houseType); //col 14: for houseType
             row.push(false); //col 15: complexSearch Sign
             row.push(""); //col 16: placeholder for complexID
-            row.push(streetAddress); ////COL 17: STREET ADDRESS
-            row.push(unitNo); ////  COL 18: UNIT NO FOR STRATA UNIT
+            row.push(streetAddress); ///COL 17: STREET ADDRESS
+            row.push(unitNo); ///  COL 18: UNIT NO FOR STRATA UNIT
             city = $(rows[i]).children("td")[self.cols.City].textContent;
-            row.push(city); //// COL 19: CITY OF GREAT VANCOUVER
-            row.push(status); ////COL 20: LISTING STATUS
+            row.push(city); /// COL 19: CITY OF GREAT VANCOUVER
+            row.push(status); ///COL 20: LISTING STATUS
             var strataFee = $(rows[i]).children("td")[self.cols.StrataFee]
               .textContent;
             strataFee = $fx.convertStringToDecimal(strataFee, true);
@@ -346,10 +376,11 @@ var computeSFPrices = {
             } catch (e) {
               strataFeePSF = 0;
             }
-            row.push(strataFeePSF); ////COL 21: STRATA FEE PER SQUARE FEET
+            row.push(strataFeePSF); ///COL 21: STRATA FEE PER SQUARE FEET
             console.info("row::", row);
+            /// 挂牌数据提取后, 存入内层表格中
             self.table.push(row); ////ADD THE ROW TO THE TABLE
-            row = []; ////INIT THE ROW
+            row = []; ///INIT THE ROW
           }
           // var avgListedSFP = (sumPSFListedPrice / self.recordCount).toFixed(0);
           // var avgSoldSFP = (sumPSFSoldPrice / countSoldListing).toFixed(0);
@@ -360,7 +391,7 @@ var computeSFPrices = {
           //   countActiveListing,
           //   "$"
           // );
-
+          /// 保存当前挂牌平均尺价数据
           self.sumValues[0] = [
             1,
             col23_ActivePricePSF,
@@ -375,19 +406,20 @@ var computeSFPrices = {
           //   countSoldListing,
           //   "$"
           // );
-
+          /// 保存已售物业的平均尺价数据
           self.sumValues[1] = [2, col24_SoldPricePSF, countSoldListing, "$"];
 
-          // self.uiTable.render(1);
+          // self.uiTable.render(1); // 附加统计信息已经转移到了上级框架网页
 
           for (var i = 0; i < self.table.length; i++) {
             if (!$fx.inGreatVanArea(self.table[i][19])) {
-              ////IF IS NOT GREAT VAN CITIES, PASSED TAX SEARCH
+              ///IF IS NOT GREAT VAN CITIES, PASSED TAX SEARCH
+              /// 如果挂牌物业不属于大温地区, 则跳过地税查询
               console.log("[SP]==>BYPASS THE NON GV CITIES!", i);
               $(rows[i + 1]).children("td")[self.cols.Address].textContent +=
                 "^";
-              self.table[i][10] = true;
-              self.table[i][15] = true;
+              self.table[i][10] = true; // 地税搜索标记
+              self.table[i][15] = true; // 小区搜索标记
               continue;
             }
           }
@@ -400,6 +432,7 @@ var computeSFPrices = {
       });
     });
 
+    /// 启动节点元素侦听事件
     $mutationObserver.observe(tableLoading, {
       attributes: true,
       characterData: true,
@@ -412,7 +445,7 @@ var computeSFPrices = {
 
   onMutation_Only_for_SummaryUi() {
     var self = this;
-    var tableLoading = document.querySelector("#grid tbody"); ////MONITOR THE #grid.tbody, CHECK THE LISTING RECORDS
+    var tableLoading = document.querySelector("#grid tbody"); /// MONITOR THE #grid.tbody, CHECK THE LISTING RECORDS
     var $mutationObserver = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
         var x = $("table#grid tbody"); //Spreadsheet table body
@@ -434,8 +467,8 @@ var computeSFPrices = {
           return;
         }
 
-        self.table.length = 0; ////INIT THIS.table
-        self.rowNumber.length = 0; ////INIT THIS.rowNumber
+        self.table.length = 0; ///INIT THIS.table
+        self.rowNumber.length = 0; ///INIT THIS.rowNumber
 
         if (
           x.children("tr").length - 1 == self.recordCount ||
@@ -469,7 +502,7 @@ var computeSFPrices = {
   ///////////////////          Assessment Search Code              /////////////
   //////////////////////////////////////////////////////////////////////////////
   onTaxSearch_old: function () {
-    ////DEFINE THE TAX.SEARCH EVENT
+    ///DEFINE THE TAX.SEARCH EVENT, 地税搜索间隔为1000ms
     (function onEvents(self) {
       chrome.storage.onChanged.addListener(function (changes, area) {
         if (self.$spreadSheet.css("display") == "none") {
@@ -492,7 +525,7 @@ var computeSFPrices = {
             if (!self.stopSearch.is(":checked")) {
               setTimeout(
                 function () {
-                  ////LOOP THE TAX.SEARCH IN THE SPREADSHEET.TABLE
+                  ///LOOP THE TAX.SEARCH IN THE SPREADSHEET.TABLE
                   this.searchTax();
                 }.bind(self),
                 1000
@@ -505,10 +538,12 @@ var computeSFPrices = {
   },
 
   onTaxSearch: function () {
-    ////DEFINE THE TAX.SEARCH EVENT
+    ///DEFINE THE TAX.SEARCH EVENT, 地税搜索间隔为50ms
     (function onEvents(self) {
       chrome.storage.onChanged.addListener(function (changes, area) {
-        if (self.$spreadSheet.css("display") == "none") {
+        let frameVisible = self.getVisibility();
+        if (self.$spreadSheet.css("display") == "none" || !frameVisible) {
+          /// 新增加Visibie控制, 如果搜索价格不可见, 不执行地税查询
           return;
         }
         if (area == "local" && "from" in changes) {
@@ -525,15 +560,20 @@ var computeSFPrices = {
             } else {
               self.updateAssess();
             }
-            if (!self.stopSearch.is(":checked")) {
+            /// 检查是否允许进行地税搜索
+            /// 1: 人工标记stopSearch 2: 父级框架网页和同级框架页是否可见  classList.contains("ui-tabs-hide")
+            /// 举例: tab4_1和tab4_2是同级别div元素, tab4是父级框架页
+            if (!self.stopSearch.is(":checked") && frameVisible) {
               setTimeout(
                 function () {
-                  ////LOOP THE TAX.SEARCH IN THE SPREADSHEET.TABLE
+                  ///LOOP THE TAX.SEARCH IN THE SPREADSHEET.TABLE
                   this.searchTax();
                   // this.searchTax_New();
                 }.bind(self),
                 50
               );
+            } else {
+              alert("No Tax Search For this property");
             }
           }
         }
@@ -541,8 +581,25 @@ var computeSFPrices = {
     })(this);
   },
 
+  /// 对象的方法 METHODS
+  getVisibility() {
+    /// 计算本搜索结果/表格的可见性
+    if (this.elementContainerLevel1.classList.contains("ui-tabs-hide")) {
+      /// 如果第一级tab容器不可见, 则本表格也不可见
+      return false;
+    }
+    if (this.elementContainerLevel2.classList.contains("ui-tabs-hide")) {
+      /// 如果第二级tab容器不可见, 则本表格也不可见
+      return false;
+    } else {
+      /// 如果第二级tab容器可见, 则本表格自己来决定可见性
+      return !this.elementContainerLevel3.classList.contains("ui-tabs-hide");
+    }
+  },
+
   searchTax: async function () {
-    ////SEARCH PROPERTY.TAX BY PID THRU BC.TAX.SEARCH #TAB1
+    ///SEARCH PROPERTY.TAX BY PID THRU BC.TAX.SEARCH #TAB1
+    /// 根据物业的PID和当前的地税年份, 在CouchDB或者原始数据库中, 提取地税/评估数据
     var self = this;
     var i = 0;
     var unTaxed = 0;
@@ -1222,6 +1279,18 @@ var computeSFPrices = {
     self.sumValues[4] = [1, assessActive, countActiveListing, "$"];
     self.sumValues[5] = [2, assessSold, countSoldListing, "$"];
     // self.uiTable.render(3);
+
+    /// 将统计数据包, 通过postMessage发送到上一级的iFrame
+    let sumValuesJSON = JSON.stringify({
+      action: "showSummaryStats",
+      sumInfo: {
+        sumValues: self.sumValues,
+        countAdtiveListing: countActiveListing,
+        countSoldListing: countSoldListing,
+      },
+    });
+    let parentFrame = parent.window.frameElement;
+    parentFrame.contentWindow.postMessage(sumValuesJSON);
 
     //table data to background
     // let btnSendTable = self.uiTable.$UITable[0].querySelector(

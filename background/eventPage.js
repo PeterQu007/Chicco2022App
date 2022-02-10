@@ -485,12 +485,9 @@ chrome.windows.getCurrent((w) => {
       console.log("Command: ", request.todo, request.from, request.tabID);
       let result = null;
       console.info("Chrome Tab ID is: ", chromeTabID);
-      chrome.tabs.query(
-        {
-          active: true,
-          currentWindow: true,
-        },
-        function (tabs) {
+
+      chrome.windows.getCurrent((w) => {
+        chrome.tabs.query({ active: true, windowId: w.id }, (tabs) => {
           chrome.tabs.sendMessage(
             tabs[0].id,
             {
@@ -508,8 +505,34 @@ chrome.windows.getCurrent((w) => {
               sendResponse(response);
             }
           );
-        }
-      );
+        });
+      });
+
+      // chrome.tabs.query(
+      //   {
+      //     active: true,
+      //     currentWindow: true,
+      //   },
+      //   function (tabs) {
+      //     chrome.tabs.sendMessage(
+      //       tabs[0].id,
+      //       {
+      //         todo: "addLock",
+      //         tabID: request.tabID,
+      //       },
+      //       function (response) {
+      //         result = response;
+      //         console.log("addLock response:", response);
+      //         // chrome.storage.local.set(
+      //         // 	{getTabID:result.tabID,
+      //         // 	getTabTitle:result.tabTitle,
+      //         // 	todo: 'getTabTitle'+Math.random().toFixed(8),
+      //         // 	from: 'EventPage.getTabTitle'});
+      //         sendResponse(response);
+      //       }
+      //     );
+      //   }
+      // );
     }
     // "https://pidrealty.local/wp-content/themes/pidHomes-PhaseI/db/dbAddSubjectProperty.php"
     if (request.todo == "saveSubjectInfo") {

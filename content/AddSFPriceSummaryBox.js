@@ -38,23 +38,25 @@ var spreadSheetSummary = {
     var $SummaryBox = $("div#dialogStats");
     console.warn("Summary box: ", $SummaryBox);
     this.uiTable.showUI_B($SummaryBox);
-    this.uiTable.setSumValues(
-      /*id for panel 1 - assess change active listings*/
-      1,
-      [100, 101, 102, 103],
-      12,
-      "%"
-    );
-    this.uiTable.setSumValues(
-      /*id for panel 2 - assess change sold listings*/
-      2,
-      [200, 201, 202, 203],
-      2,
-      "%"
-    );
-    this.uiTable.render_B(1);
-    this.uiTable.render_B(2);
-    this.uiTable.render_B(3);
+    // this.uiTable.setSumValues(
+    //   /*id for panel 1 - assess change active listings*/
+    //   1,
+    //   [100, 101, 102, 103],
+    //   12,
+    //   "%"
+    // );
+    // this.uiTable.setSumValues(
+    //   /*id for panel 2 - assess change sold listings*/
+    //   2,
+    //   [200, 201, 202, 203],
+    //   2,
+    //   "%"
+    // );
+    // this.uiTable.render_B(1);
+    // this.uiTable.render_B(2);
+    // this.uiTable.render_B(3);
+
+    this.onPostMessage();
 
     // this.$mutationObserver = new MutationObserver(function(mutations) {
     //     mutations.forEach(function(mutation) {
@@ -78,6 +80,31 @@ var spreadSheetSummary = {
   $mutationObserver: null,
   uiTable: new uiSummaryTable(this),
   //$loadingNotice: null,
+
+  onPostMessage() {
+    window.addEventListener("message", (event) => {
+      if (
+        event.origin.indexOf(
+          "https://bcres.paragonrels.com/ParagonLS/Search/Property.mvc/Index/"
+        )
+      ) {
+        // The data has been sent from your site
+
+        // The data sent with postMessage is stored in event.data
+        console.log(event.data);
+        let eventData = JSON.parse(event.data);
+
+        if ((eventData.action = "showSummaryStats")) {
+          console.log(eventData.sumInfo);
+          this.showSummaryStats(eventData.sumInfo);
+        }
+      } else {
+        // The data hasn't been sent from your site!
+        // Be careful! Do not use it.
+        return;
+      }
+    });
+  },
 
   OnTabTitle: function () {
     let self = this;
@@ -149,6 +176,36 @@ var spreadSheetSummary = {
       todo: "hideQuickSearch",
       tabID: this.tabID,
     });
+  },
+
+  showSummaryStats: function (sumInfo) {
+    this.uiTable.setSumValues(
+      /*id for panel 1 - assess change active listings*/
+      ...sumInfo.sumValues[0]
+    );
+    this.uiTable.setSumValues(
+      /*id for panel 2 - assess change sold listings*/
+      ...sumInfo.sumValues[1]
+    );
+    this.uiTable.render_B(1);
+    this.uiTable.setSumValues(
+      /*id for panel 1 - assess change active listings*/
+      ...sumInfo.sumValues[2]
+    );
+    this.uiTable.setSumValues(
+      /*id for panel 2 - assess change sold listings*/
+      ...sumInfo.sumValues[3]
+    );
+    this.uiTable.render_B(2);
+    this.uiTable.setSumValues(
+      /*id for panel 1 - assess change active listings*/
+      ...sumInfo.sumValues[4]
+    );
+    this.uiTable.setSumValues(
+      /*id for panel 2 - assess change sold listings*/
+      ...sumInfo.sumValues[5]
+    );
+    this.uiTable.render_B(3);
   },
 };
 
