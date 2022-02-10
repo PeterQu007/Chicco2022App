@@ -727,22 +727,38 @@
 
       switch (true) {
         case urlLocationOptionLocal.prop("checked"):
+          // localhost of dell or hp
           // ajax_url =
           //   "http://localhost/pidrealty4/wp-content/themes/Realhomes-child-3/db/";
           ajax_url =
             "https://pidrealty4.local/wp-content/themes/realhomes-child-3/db/";
           break;
         case urlLocationOptionSynology.prop("checked"):
+          // synology url
           ajax_url =
             "https://pidrealty.ca/wp-content/themes/realhomes-child-3/db/";
           break;
-        case urlLocationRemote.pro("checked"):
+        case urlLocationRemote.prop("checked"):
+          // live mysql url
           ajax_url =
-            "https://cn.pidhomes.ca/wp-content/themes/realhomes-child-3/db/";
+            "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/";
           break;
       }
 
       return ajax_url;
+    },
+
+    currentTaxYear: function () {
+      const d = new Date(); // 当前日期
+      let currentTaxYear = d.getFullYear(); // 当前年份
+      return currentTaxYear;
+    },
+
+    getToday_yyyymmdd: function () {
+      const d = new Date(); // 当前日期
+      const $today =
+        d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+      return $today;
     },
   };
 

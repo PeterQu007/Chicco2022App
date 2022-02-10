@@ -1,4 +1,4 @@
-//// UI ELEMENT: Extra Summary Table
+/// UI ELEMENT: Extra Summary Table
 "use strict";
 
 import SumBoxButtons from "../components/sumBoxButtons";
@@ -97,6 +97,19 @@ export default class UISummaryTable {
     //registerServiceWorker();
   }
 
+  showUI_B(container) {
+    this.$UITable.appendTo(container);
+
+    const btnContainer = document.querySelector("#sumButtonContainer");
+    ReactDOM.render(
+      <SumBoxButtons tabTitle={this.tabTitle} parent={this.parent} />,
+      btnContainer
+    );
+
+    this.render_B(1);
+    //registerServiceWorker();
+  }
+
   setSumValue(id, key, value, unit) {
     this.state.panels[id].values[key] = Number.isFinite(parseInt(value))
       ? unit == "%"
@@ -154,6 +167,55 @@ export default class UISummaryTable {
         this.state.panels[1].labels.name = "L:$B";
         this.state.panels[2].labels.name = "S:$B";
         const panelBCAContainer = parent.document.querySelector(
+          "#sumPanelBCAContainer"
+        );
+        ReactDOM.render(
+          <SumBoxPanels
+            key={id}
+            panels={this.state.panels}
+            onClick={this.handleClick}
+          />,
+          panelBCAContainer
+        );
+        break;
+    }
+  }
+
+  render_B(id) {
+    switch (id) {
+      case 1:
+        this.state.panels[0].labels.name = "$PSF";
+        const panelContainer = document.querySelector("#sumPanelContainer");
+        ReactDOM.render(
+          <SumBoxPanels
+            key={id}
+            panels={this.state.panels}
+            onClick={this.handleClick}
+          />,
+          panelContainer
+        );
+        break;
+      case 2:
+        this.state.panels[0].labels.name = "BCA%";
+        this.state.panels[1].labels.name = "L:%";
+        this.state.panels[2].labels.name = "S:%";
+        const panelBCAChangeContainer = document.querySelector(
+          "#sumPanelBCAChangeContainer"
+        );
+        ReactDOM.render(
+          <SumBoxPanels
+            key={id}
+            panels={this.state.panels}
+            onClick={this.handleClick}
+          />,
+          panelBCAChangeContainer
+        );
+        break;
+      case 3:
+        this.state.panels[0].labels.name = "BCA";
+        this.state.panels[1].labels.name = "L:$B";
+        this.state.panels[2].labels.name = "S:$B";
+        const panelBCAContainer = document.querySelector(
           "#sumPanelBCAContainer"
         );
         ReactDOM.render(

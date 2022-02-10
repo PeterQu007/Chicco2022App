@@ -30,7 +30,7 @@ class MainMenu {
         <label for='pid_local'>Local&nbsp</label>
         <input type="radio" class = "pid_subject_property_options" id='pid_synology' name="LoadSubjects" value="synology" checked='checked' />
         <label for='pid_synology'>Synology&nbsp</label>
-        <input type="radio" class = "pid_subject_property_options" id='pid_remote; ?>' name="LoadSubjects" value="remote" />
+        <input type="radio" class = "pid_subject_property_options" id='pid_remote' name="LoadSubjects" value="remote" />
         <label for='pid_remote'>Remote&nbsp</label>
       </div>`);
     this.formLoadSubject.append(this.radioSubjectLoadingLink);

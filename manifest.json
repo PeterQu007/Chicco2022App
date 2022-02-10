@@ -21,7 +21,11 @@
       "./assets/lib/underscore/underscore-min.js",
       "./assets/scripts/Library.js",
       "./assets/scripts/modules/Database.js",
+      "./assets/scripts/modules/chrome-storage-promise.js",
+      "./assets/scripts/modules/chrome-tabs-promise.js",
+      "./background/searchTax.js",
       "./background/eventPage.js"
+      // "./temp/scripts/EventPage.js"
     ],
     "persistent": false
   },
@@ -106,7 +110,8 @@
       //Function: Collect Tax Info & Property Info
       "run_at": "document_end",
       "matches": [
-        "https://bcres.paragonrels.com/ParagonLS/Reports/TaxReport.mvc?listingIDs=*&screenWidth=*&uniqueIDs=*&viewID=*&classID=1&usePDF=false&ShowAds=true&searchID=tab1_1_2&listingMode=0"
+        "https://bcres.paragonrels.com/ParagonLS/Reports/TaxReport.mvc?listingIDs=*&screenWidth=*&uniqueIDs=*&viewID=*&classID=1&usePDF=false&ShowAds=true&searchID=tab1_1_2&listingMode=0",
+        "https://bcres.paragonrels.com/ParagonLS/Reports/Report.mvc?listingIDs=*&viewID=24*"
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
@@ -127,10 +132,12 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
+        "./assets/lib/underscore/underscore-min.js",
         //"./temp/scripts/CountSearch.js",
         "./temp/scripts/CountBody1-jquery.js",
         "./temp/scripts/CountBody2-Modulejs.js",
         "./temp/scripts/CountBody3-SearchCriteriajs.js",
+        "./assets/scripts/Library.js",
         //"./temp/scripts/MLS-BypassListingSearchCriteria.js"
         "./content/BypassListingSearchCriteria.js"
       ],
@@ -153,6 +160,7 @@
         "./assets/lib/react/react-dom.development.js",
         "./assets/scripts/Library.js",
         "./temp/scripts/MLS-AddSFPriceSummaryBox.js"
+        // "./content/AddSFPriceSummaryBox.js"
       ],
       "css": ["./temp/content.css"],
       "all_frames": true
@@ -173,9 +181,15 @@
         "./assets/lib/jquery.initialize-master/jquery.initialize.js",
         "./assets/lib/underscore/underscore-min.js",
         "./assets/scripts/Library.js",
-        "./assets/lib/react/react.development.js",
-        "./assets/lib/react/react-dom.development.js",
-        "./temp/scripts/MLS-SpreadSheetCompletion.js"
+        // "./assets/lib/react/react.development.js",
+        // "./assets/lib/react/react-dom.development.js",
+        "./assets/scripts/modules/chrome-storage-promise.js",
+        //"./assets/scripts/modules/chrome-tabs-promise.js",
+        "./assets/scripts/modules/AddressInfo.js",
+        "./assets/scripts/modules/Assessment.js",
+        "./assets/scripts/modules/Complex.js",
+        "./content/SpreadSheetCompletion.js"
+        // "./temp/scripts/MLS-SpreadSheetCompletion.js"
       ],
       "css": ["./temp/content.css"],
       "all_frames": true
@@ -295,7 +309,8 @@
     {
       "run_at": "document_end",
       "matches": [
-        "https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/*SearchCount=*&IsFromSearch=true&tabName=tab*"
+        "https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/*SearchCount=*&IsFromSearch=true&tabName=tab*",
+        "https://bcres.paragonrels.com/ParagonLS/Controls/VirtualEarth.mvc/Index/*IsFromSearch=true&tabName=tab*"
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",

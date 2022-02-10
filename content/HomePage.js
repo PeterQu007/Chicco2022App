@@ -242,7 +242,8 @@ let DefaultPage = {
     $.ajax({
       //url:
       //  "http://localhost/pidrealty4/wp-content/themes/RealHomes-child-3/db/data.php",
-      url: "https://pidrealty4.local/wp-content/themes/RealHomes-child-3/db/data.php",
+      //  "https://pidrealty4.local/wp-content/themes/RealHomes-child-3/db/data.php",
+      url: "https://pidrealty.ca/wp-content/themes/realhomes-child-3/db/data.php", // 连接到Synology的MySQL数据库
       method: "post",
       data: {
         postTitle: title,

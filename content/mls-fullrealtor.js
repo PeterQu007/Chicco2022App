@@ -15,6 +15,8 @@
 //var curTabID = null;
 var $fx = L$();
 console.clear();
+var d = new Date(); // 当前日期
+var taxYear = d.getFullYear(); // 以当前年份, 作为纳税/评估查询的年份
 
 var fullRealtor = {
   init: function () {
@@ -745,6 +747,7 @@ var fullRealtor = {
   },
 
   searchTax: function () {
+    // 向后端eventPage.js 发送地税/评估查询请求
     var PID = this.pid.text();
     var self = this;
     console.log(
@@ -755,7 +758,7 @@ var fullRealtor = {
       console.log("[FR] - P.I.D Could not be read, taxSearch Exit");
       return;
     }
-    chrome.storage.local.set({ PID: PID });
+    chrome.storage.local.set({ PID: PID, taxYear: taxYear });
     chrome.storage.local.get("PID", function (result) {
       //console.log(">>>PID saved for tax search: ", result.PID);
       chrome.runtime.sendMessage(
@@ -766,7 +769,9 @@ var fullRealtor = {
           var divTaxSearch = $("div#tab1", top.document);
           self.tabContentContainer = divTab;
           console.log(divTab);
+          // 锁定当前的报告界面, 不要跳转到地税搜索页面
           divTab.attr("style", "display: block!important");
+          // 地税搜索页面不可见
           divTaxSearch.attr("style", "display: none!important");
           chrome.storage.local.set({ curTabID: self.tabID });
         }

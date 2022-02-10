@@ -189,7 +189,14 @@ class SumBoxButtons extends React.Component {
   onTaxSearch() {
     let { parent } = this.props;
     console.log(parent);
-    parent.searchTax();
+    /// 如果parent没有searchTax子程序, 则需要向下一级iFrame发出postMessage指令
+    if (parent.hasOwnProperty("searchTax")) {
+      parent.searchTax();
+    } else {
+      console.log("TODO: postMessage to ifSpreadsheet");
+      let iFrame = document.getElementById("ifSpreadsheet");
+      iFrame.contentWindow.postMessage("taxSearch");
+    }
   }
 
   onExp() {
@@ -197,8 +204,21 @@ class SumBoxButtons extends React.Component {
     let { tabTitle } = this.props;
     ////---- Get the col name row, push names to the cloned table head row
     var htmlHead = document.querySelector(".ui-jqgrid-htable");
+    /// 如果htmlHead为空, 则上面的document是旧程序的ifSpreadsheet
+    /// 现在已经改为了上一级的document, 所以需要从里面的iframe取出有关的表头元素
+    if (!htmlHead) {
+      htmlHead = document
+        .getElementById("ifSpreadsheet")
+        .contentWindow.document.querySelector(".ui-jqgrid-htable");
+    }
     var cloneHead = $(htmlHead).clone().attr("id", "newClonedHead");
     var htmlTable = document.querySelector("#grid");
+    /// 如果htmlTable为空, 则同理需要从下一级的iframe中取出表格元素
+    if (!htmlTable) {
+      htmlTable = document
+        .getElementById("ifSpreadsheet")
+        .contentWindow.document.querySelector("#grid");
+    }
     var cloneTable = $(htmlTable).clone().attr("id", "newClonedTable");
 
     var rowHead = $(cloneHead).children().find("tr");
@@ -548,8 +568,8 @@ class SumBoxButtons extends React.Component {
     var address = "14043 109 AVE";
     var id = "1234";
     ////////////////////
-    ////MANUALLY SAVE OR UPDATE COMPLEX NAME TO THE DATABASE
-    ////RECORD NO HAS TO BE LOOK UP THE CHECKED ONE IN THE TABLE
+    ///MANUALLY SAVE OR UPDATE COMPLEX NAME TO THE DATABASE
+    ///RECORD NO HAS TO BE LOOK UP THE CHECKED ONE IN THE TABLE
     const { tabTitle } = this.props;
     //var self = this;
     var cols = $fx.setCols(tabTitle);
@@ -563,6 +583,13 @@ class SumBoxButtons extends React.Component {
     var recordNo_i = 0;
     var recordCheckbox_i = null;
     var htmlTable = document.querySelector("#grid");
+    /// 如果htmlTable为空, 则需要从小一级的iFrame, 即ifSpreadsheet中, 提取htmlTable
+    /// 因为Listing数据列表存在于ifSpreadsheet中
+    if (!htmlTable) {
+      htmlTable = document
+        .getElementById("ifSpreadsheet")
+        .contentWindow.document.querySelector("#grid");
+    }
     var recordRows = $(htmlTable).children().find("tr");
 
     for (var i = 1; i < recordRows.length; i++) {
@@ -700,6 +727,12 @@ class SumBoxButtons extends React.Component {
     var recordNo_i = 0;
     var recordCheckbox_i = null;
     var htmlTable = document.querySelector("#grid");
+    /// 如果htmlTable为空, 则需要从下一级的iFrame中提取表格
+    if (!htmlTable) {
+      htmlTable = document
+        .getElementById("ifSpreadsheet")
+        .contentWindow.document.querySelector("#grid");
+    }
     var recordRows = $(htmlTable).children().find("tr");
 
     for (var i = 1; i < recordRows.length; i++) {
@@ -791,7 +824,20 @@ class SumBoxButtons extends React.Component {
   onSendTableInfoToBackground() {
     console.log("send the listing table to background event page !!");
     var htmlTable = document.querySelector("#grid");
+    /// 如果htmlTable为空, 则同理需要从下一级的iframe中取出表格元素
+    if (!htmlTable) {
+      htmlTable = document
+        .getElementById("ifSpreadsheet")
+        .contentWindow.document.querySelector("#grid");
+    }
     var htmlHead = document.querySelector(".ui-jqgrid-htable");
+    /// 如果htmlHead为空, 则上面的document是旧程序的ifSpreadsheet
+    /// 现在已经改为了上一级的document, 所以需要从里面的iframe取出有关的表头元素
+    if (!htmlHead) {
+      htmlHead = document
+        .getElementById("ifSpreadsheet")
+        .contentWindow.document.querySelector(".ui-jqgrid-htable");
+    }
     var tableData = JSON.stringify(htmlTable.innerHTML);
     var tagsToReplace = {
       "&": "&amp;",
@@ -808,25 +854,29 @@ class SumBoxButtons extends React.Component {
     }
     var array = [];
     var headers = [];
-    $(".ui-jqgrid-htable th").each(function (index, item) {
+
+    let $headElements = $(".ui-jqgrid-htable th"); /// 只适用于ifSpreadsheet
+    $headElements = $(htmlHead).find("th"); /// 在上一级iFrame中提取表头元素
+    $headElements.each(function (index, item) {
       headers[index] = $(item)
         .html()
         .replace(/(<([^>]+)>)/gi, "")
         .replace("&nbsp;", "")
         .substr(0, 50);
     });
-    $("#grid tr")
-      .has("td")
-      .each(function () {
-        var arrayItem = {};
-        $("td", $(this)).each(function (index, item) {
-          arrayItem[headers[index]] = $(item)
-            .html()
-            .replace(/(<([^>]+)>)/gi, "")
-            .replace("&nbsp;", "");
-        });
-        array.push(arrayItem);
+
+    let $dataElements = $("#grid tr"); /// 只适用于ifSpreadsheet
+    $dataElements = $(htmlTable).find("tr"); /// 在上一级iFrame中提取表格数据单元
+    $dataElements.has("td").each(function () {
+      var arrayItem = {};
+      $("td", $(this)).each(function (index, item) {
+        arrayItem[headers[index]] = $(item)
+          .html()
+          .replace(/(<([^>]+)>)/gi, "")
+          .replace("&nbsp;", "");
       });
+      array.push(arrayItem);
+    });
 
     var tableInfo = {
       table: JSON.stringify(array),
@@ -834,9 +884,9 @@ class SumBoxButtons extends React.Component {
       from: "uiSummaryTable::onSendTableToBackground",
     };
 
-    ////SEND THE COMPLEX NAME INTO THE DATABASE BY CALL ADD.COMPLEX.INFO
+    ///发送数据包
     chrome.runtime.sendMessage(tableInfo, function (response) {
-      console.log("save CMA Info");
+      console.log("Spreadsheet table has been sent out to map search");
     });
   }
 }

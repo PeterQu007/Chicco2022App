@@ -78,4 +78,4 @@ class Assessment {
   }
 }
 
-export default Assessment;
+// export default Assessment;

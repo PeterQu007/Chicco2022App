@@ -89,50 +89,61 @@ class Database {
     //console.groupEnd('database constructor');
   }
 
-  async readAssess_promise(taxID) {
+  async readAssessPromise(taxID) {
     var self = this;
     try {
       let taxAssess = await self.dbAssess.get(taxID);
       self.assess = taxAssess;
       taxAssess.from = "assess-" + Math.random().toFixed(8);
       taxAssess.dataFromDB = true;
-      return Promise.resolve(taxAssess);
+      switch (String(taxAssess.bcaSearch)) {
+        case "success":
+          // 成功的数据, 返回该数据包
+          return Promise.resolve(taxAssess);
+        default:
+          // 失败的数据, 以错误的形式返回数据包
+          return Promise.reject(taxAssess);
+      }
     } catch (err) {
+      // 数据库读取错误, 抛出错误信息
       return Promise.reject(err);
     }
   }
 
-  readAssess(taxID, callback) {
-    //console.group(">>>readAssess");
+  async readAssess(taxID, callback) {
     var self = this;
-    self.dbAssess
-      .get(taxID)
-      .then(function (doc) {
-        var assess = (self.assess = doc);
-        //console.log(">>>read the tax info in database is: ", assess);
-        assess.from = "assess-" + Math.random().toFixed(8);
-        assess.dataFromDB = true;
-        // chrome.storage.local.set(
-        // 	// {
-        // 	// 	landValue: doc.landValue,
-        // 	// 	improvementValue: doc.improvementValue,
-        // 	// 	totalValue: doc.totalValue,
-        // 	// 	_id: doc._id,
-        // 	// 	from: 'assess' + Math.random().toFixed(8)
-        // 	// }
-        // 	assess
-        // );
-        callback(self.assess);
-      })
-      .catch(function (err) {
-        //console.log(">>>read database error: ", err);
-        self.assess = {};
-        self.assess.from = "assess-" + Math.random().toFixed(8);
-        self.assess.dataFromDB = true;
-        self.assess._id = null;
-        callback(self.assess);
-      });
-    //console.groupEnd(">>>readAssess");
+    /// 更改为async/await版本
+    try {
+      const assessDoc = await self.dbAssess.get(taxID);
+      let assess = (self.assess = assessDoc);
+      assess.from = "assess-" + Math.random().toFixed(8);
+      assess.dataFromDB = true;
+      callback(self.assess);
+    } catch (err) {
+      self.assess = {};
+      self.assess.from = "assess-" + Math.random().toFixed(8);
+      self.assess.dataFromDB = true;
+      self.assess._id = null;
+      callback(self.assess);
+    }
+
+    // self.dbAssess
+    //   .get(taxID)
+    //   .then(function (doc) {
+    //     var assess = (self.assess = doc);
+    //     //console.log(">>>read the tax info in database is: ", assess);
+    //     assess.from = "assess-" + Math.random().toFixed(8);
+    //     assess.dataFromDB = true;
+    //     callback(self.assess);
+    //   })
+    //   .catch(function (err) {
+    //     //console.log(">>>read database error: ", err);
+    //     self.assess = {};
+    //     self.assess.from = "assess-" + Math.random().toFixed(8);
+    //     self.assess.dataFromDB = true;
+    //     self.assess._id = null;
+    //     callback(self.assess);
+    //   });
   }
 
   readAssess_v6(taxID, callback) {
@@ -157,34 +168,78 @@ class Database {
     }
   }
 
-  writeAssess(assess) {
-    //console.group('writeAssess');
+  async writeAssessPromise(assess) {
+    /// ADD promise version of writeAssess
     var taxID = assess._id;
     var self = this;
     assess.dataFromDB = true;
     var d = new Date();
     assess.addedDate =
       d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
-    self.dbAssess
-      .put(assess)
-      .then(function () {
-        return self.dbAssess.get(taxID);
-      })
-      .then(function (doc) {
-        //console.log(">>>bc assessment has been saved to db: ", doc);
-      })
-      .catch(function (err) {
-        //console.log(">>>save bc assessment error: ", err);
-        self.dbAssess
-          .get(taxID)
-          .then(function (doc) {
-            return self.dbAssess.remove(doc);
-          })
-          .catch(function (err) {
-            //console.log(">>>remove bc assess error: ", err);
-          });
-      });
-    //console.groupEnd('writeAssess');
+    // 写数据之前, 用taxID读取记录, 如果有重复的数据, 就取得_rev
+    try {
+      const assessDoc = await self.dbAssess.get(taxID);
+      assess._rev = assessDoc._rev;
+    } catch (err) {
+      // TODO 需要增加读取数据发生错误时候的处理代码
+      console.log(`Read CouchDB Err:${err}`);
+      // CouchDB数据库中没有相关记录, 需要写入新的数据
+    }
+    try {
+      const writeRes = await self.dbAssess.put(assess);
+      return Promise.resolve(writeRes);
+    } catch (err) {
+      // TODO 需要增加写CouchDB发生错误的代码
+      console.log(`write CouchDB Error: ${err}`);
+      return Promise.reject(err);
+    }
+  }
+
+  async writeAssess(assess) {
+    /// ADD promise version of writeAssess
+    var taxID = assess._id;
+    var self = this;
+    assess.dataFromDB = true;
+    var d = new Date();
+    assess.addedDate =
+      d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+    // 写数据之前, 用taxID读取记录, 如果有重复的数据, 就取得_rev
+    try {
+      const assessDoc = await self.dbAssess.get(taxID);
+      assess._rev = assessDoc._rev;
+    } catch (err) {
+      // TODO 需要增加读取数据发生错误时候的处理代码
+      console.log(`Read CouchDB Err:${err}`);
+    }
+    try {
+      const writeRes = await self.dbAssess.put(assess);
+    } catch (err) {
+      // TODO 需要增加写CouchDB发生错误的代码
+      console.log(`write CouchDB Error: ${err}`);
+    }
+    return assess;
+    // self.dbAssess.get(taxID).then((doc) => {
+    //   assess._rev = doc._rev;
+    //   self.dbAssess
+    //     .put(assess)
+    //     .then(function () {
+    //       return self.dbAssess.get(taxID);
+    //     })
+    //     .then(function (doc) {
+    //       //console.log(">>>bc assessment has been saved to db: ", doc);
+    //     })
+    //     .catch(function (err) {
+    //       //console.log(">>>save bc assessment error: ", err);
+    //       self.dbAssess
+    //         .get(taxID)
+    //         .then(function (doc) {
+    //           return self.dbAssess.remove(doc);
+    //         })
+    //         .catch(function (err) {
+    //           //console.log(">>>remove bc assess error: ", err);
+    //         });
+    //     });
+    // }
   }
 
   async readStrataPlanSummary_Promise(strataPlan) {
