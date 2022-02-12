@@ -14,6 +14,7 @@ GoogleMapsApi*.*
 node_modules/
 .tmp/
 googlekey.php
+@mls-login.js
 
 # Temperary folders
 **/temp/
