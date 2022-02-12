@@ -63,24 +63,24 @@ class Database {
     //   console.log(res);
     // });
 
-    this.dbAssess.info().then(function (info) {
-      console.log(info);
-    });
-    this.dbComplex.info().then(function (info) {
-      console.log(info);
-    });
-    this.dbExposure.info().then(function (info) {
-      console.log(info);
-    });
-    this.dbListing.info().then(function (info) {
-      console.log(info);
-    });
-    this.dbStrataPlanSummary.info().then(function (info) {
-      console.log(info);
-    });
-    this.dbShowing.info().then(function (info) {
-      console.log(info);
-    });
+    // this.dbAssess.info().then(function (info) {
+    //   console.log(info);
+    // });
+    // this.dbComplex.info().then(function (info) {
+    //   console.log(info);
+    // });
+    // this.dbExposure.info().then(function (info) {
+    //   console.log(info);
+    // });
+    // this.dbListing.info().then(function (info) {
+    //   console.log(info);
+    // });
+    // this.dbStrataPlanSummary.info().then(function (info) {
+    //   console.log(info);
+    // });
+    // this.dbShowing.info().then(function (info) {
+    //   console.log(info);
+    // });
     this.assess = null;
     this.complex = null;
     this.exposure = null;

@@ -173,21 +173,14 @@ let DefaultPage = {
 
         //get TabTitle by TabID
         if (request.todo == "addLock") {
-          console.group("addLock", request.tabID);
-          // self.mainNavBar.mainNavItems.forEach(function (navItem) {
-          //     if (navItem.ID == request.tabID) {
-          //         console.log('find tabTitle:', navItem.ID, navItem.Title);
-          //         sendResponse({ tabID: navItem.ID, tabTitle: navItem.Title })
-          //     }
-          // })
+          console.log("addLock", request.tabID);
           if (request.tabID != "#") {
             self.mainNavBar.update();
             self.mainNavBar.addLock(request.tabID);
-            console.group("addLock Succeed");
+            console.log("addLock Succeed");
           } else {
-            console.group("Cannot addLock");
+            console.log("Cannot addLock");
           }
-          console.groupEnd();
         }
       });
     })(this);

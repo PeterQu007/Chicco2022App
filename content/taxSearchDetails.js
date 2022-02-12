@@ -7,8 +7,24 @@
 
 const divContainerID = "divHtmlReport";
 var curTabID = null;
+console.log("Tax Details Tab1_1_2");
+/// 当前页面转到保存的搜索清单tab3
+// let tabSavedSearches = top.document.querySelectorAll("a[href='#tab3']");
+// tabSavedSearches[0].click();
+
+/// 添加通讯句柄
+// window.addEventListener("message", (event) => {
+//   if (
+//     event.origin.indexOf(
+//       "https://bcres.paragonrels.com/ParagonLS/Search/Tax.mvc?DBid=1&countyID=1&searchID=tab1_1"
+//     )
+//   ) {
+//     event.source.postMessage(taxDetails.assessInfo, event.origin);
+//   }
+// });
 
 let taxDetails = {
+  /// 属性
   /// 模型化Paragon里面的地税报告, 读取各个数据字段:
   pid: $('div[style="top:113px;left:150px;width:221px;height:14px;"]').text(),
   address: $(
@@ -45,73 +61,189 @@ let taxDetails = {
   recentSalePrice: "",
   recentSaleDocNum: "",
   recentSaleType: "",
+  assessInfo: null,
+  assessInfoIsReady: false,
 
   /// 标记新建物业, 刚刚开始有初始的地税报告
   newTaxAssessRecord: false,
 
-  init: function () {
+  init: async function () {
     let self = this;
-    chrome.storage.local.get(
-      ["houseType", "taxSearchRequester"],
-      function (result) {
-        self.houseType = result.houseType;
-        console.log("houseType is: ", self.houseType);
-        console.log("TopPosition: ", self.ActualTotalsTopPosition);
 
-        /// 读取地税报告字段
-        self.getTaxReportDetails();
+    let result = await chrome.storage.promise.local.get([
+      "houseType",
+      "taxSearchRequester",
+    ]);
 
-        /// 组装地税和评估数据包
-        let assess = {
-          _id: self.pid + "-" + self.taxYear, ///地税年份使用实际交税的年份, 不要使用政府评估的年份
-          landValue: self.landValue,
-          improvementValue: self.improvementValue,
-          totalValue: self.totalValue,
-          PID: self.pid,
-          taxYear: self.taxYear,
-          address: self.address,
-          legal: self.legal,
-          taxRollNumber: self.taxRollNumber,
-          grossTaxes: self.grossTaxes,
-          planNum: self.planNum,
-          houseType: self.houseType,
-          lotSize: self.lotSize,
-          bcaDataUpdateDate: self.bcaDataUpdateDate,
-          bcaDescription: self.bcaDescription,
-          from: self.newTaxAssessRecord
-            ? "assess-" +
-              result.taxSearchRequester +
-              "-TaxSearchFailed-" +
-              Math.random().toFixed(8)
-            : "assess-" +
-              result.taxSearchRequester +
-              "-" +
-              Math.random().toFixed(8),
-          bcaSearch: self.newTaxAssessRecord ? "failed" : "success",
-          dataFromDB: false,
-        };
+    self.houseType = result.houseType;
+    console.log("houseType is: ", result.houseType);
+    console.log("TopPosition: ", self.ActualTotalsTopPosition);
 
-        /// 发送地税和评估数据包, 引发数据包变化事件, 在主程序中做处理
-        chrome.storage.local.set(assess, function () {
-          console.log("TaxDetails.bcAssessment is...", assess);
-        });
+    /// 读取地税报告字段
+    self.getTaxReportDetails();
 
-        /// 发送数据包到后端服务程序, 将新的地税和评估数据存入数据库
-        /// 如果本段代码是由paragon的Full Realtor Report中的tax按钮触发的, 由于没有调用读取数据库的过程
-        /// 更新couchDB的doc不会成功完成.
-        chrome.runtime.sendMessage(
-          {
-            todo: "saveTax",
-            taxData: assess,
-          },
-          function (response) {
-            console.log("tax Data has been save to the database!");
-          }
-        );
-      }
-    );
+    /// 组装地税和评估数据包
+    let assess = {
+      _id: self.pid + "-" + self.taxYear, ///地税年份使用实际交税的年份, 不要使用政府评估的年份
+      landValue: self.landValue,
+      improvementValue: self.improvementValue,
+      totalValue: self.totalValue,
+      PID: self.pid,
+      taxYear: self.taxYear,
+      address: self.address,
+      legal: self.legal,
+      taxRollNumber: self.taxRollNumber,
+      grossTaxes: self.grossTaxes,
+      planNum: self.planNum,
+      houseType: self.houseType,
+      lotSize: self.lotSize,
+      bcaDataUpdateDate: self.bcaDataUpdateDate,
+      bcaDescription: self.bcaDescription,
+      from: self.newTaxAssessRecord
+        ? "assess-" +
+          result.taxSearchRequester +
+          "-TaxSearchFailed-" +
+          Math.random().toFixed(8)
+        : "assess-" +
+          result.taxSearchRequester +
+          "-" +
+          Math.random().toFixed(8),
+      bcaSearch: self.newTaxAssessRecord ? "failed" : "success",
+      dataFromDB: false,
+    };
+
+    this.assessInfo = assess;
+    this.assessInfoIsReady = true;
+
+    /// 添加事件句柄
+    this.onMessage();
+    // this.onWindowPostMessage();
+
+    /// 向服务请求程序发送数据包
+    let taxSearchRequesterFrame = top.document.getElementById("tab1_1_1");
+    taxSearchRequesterFrame.contentWindow.postMessage(this.assessInfo);
+
+    /// 发送地税和评估数据包, 引发数据包变化事件, 在主程序中做处理
+    // chrome.storage.local.set(assess, function () {
+    //   console.log("TaxDetails.bcAssessment is...", assess);
+    // });
+
+    /// 发送数据包到后端服务程序, 将新的地税和评估数据存入数据库
+    /// 如果本段代码是由paragon的Full Realtor Report中的tax按钮触发的, 由于没有调用读取数据库的过程
+    /// 更新couchDB的doc不会成功完成.
+    /////////////////////////////////////////////
+    // chrome.runtime.sendMessage(
+    //   {
+    //     todo: "saveTax",
+    //     taxData: assess,
+    //   },
+    //   function (response) {
+    //     console.log("tax Data has been save to the database!");
+    //   }
+    // );
+    //////////////////////////////////////////////////////////////////////////
+
+    // chrome.storage.local.get(
+    //   ["houseType", "taxSearchRequester"],
+    //   function (result) {
+    //     self.houseType = result.houseType;
+    //     console.log("houseType is: ", self.houseType);
+    //     console.log("TopPosition: ", self.ActualTotalsTopPosition);
+
+    //     /// 读取地税报告字段
+    //     self.getTaxReportDetails();
+
+    //     /// 组装地税和评估数据包
+    //     let assess = {
+    //       _id: self.pid + "-" + self.taxYear, ///地税年份使用实际交税的年份, 不要使用政府评估的年份
+    //       landValue: self.landValue,
+    //       improvementValue: self.improvementValue,
+    //       totalValue: self.totalValue,
+    //       PID: self.pid,
+    //       taxYear: self.taxYear,
+    //       address: self.address,
+    //       legal: self.legal,
+    //       taxRollNumber: self.taxRollNumber,
+    //       grossTaxes: self.grossTaxes,
+    //       planNum: self.planNum,
+    //       houseType: self.houseType,
+    //       lotSize: self.lotSize,
+    //       bcaDataUpdateDate: self.bcaDataUpdateDate,
+    //       bcaDescription: self.bcaDescription,
+    //       from: self.newTaxAssessRecord
+    //         ? "assess-" +
+    //           result.taxSearchRequester +
+    //           "-TaxSearchFailed-" +
+    //           Math.random().toFixed(8)
+    //         : "assess-" +
+    //           result.taxSearchRequester +
+    //           "-" +
+    //           Math.random().toFixed(8),
+    //       bcaSearch: self.newTaxAssessRecord ? "failed" : "success",
+    //       dataFromDB: false,
+    //     };
+
+    //     this.assessInfo = assess;
+    //     this.assessInfoIsReady = true;
+
+    //     /// 发送地税和评估数据包, 引发数据包变化事件, 在主程序中做处理
+    //     chrome.storage.local.set(assess, function () {
+    //       console.log("TaxDetails.bcAssessment is...", assess);
+    //     });
+
+    //     /// 发送数据包到后端服务程序, 将新的地税和评估数据存入数据库
+    //     /// 如果本段代码是由paragon的Full Realtor Report中的tax按钮触发的, 由于没有调用读取数据库的过程
+    //     /// 更新couchDB的doc不会成功完成.
+    //     chrome.runtime.sendMessage(
+    //       {
+    //         todo: "saveTax",
+    //         taxData: assess,
+    //       },
+    //       function (response) {
+    //         console.log("tax Data has been save to the database!");
+    //       }
+    //     );
+    //   }
+    // );
   },
 
+  /// 事件
+  /// 从后台程序接受信息的事件句柄
+  onMessage: function () {
+    chrome.runtime.onMessage.addListener((msg, sender, response) => {
+      if (msg.todo === "getTaxSearchDetailsFromFrontService") {
+        // 读取地税详细信息
+        // 监视地税数据是否完成
+        let monitorCounter = 1;
+        let checkTaxDetailsResult = async () => {
+          if (this.assessInfoIsReady) {
+            clearInterval(checkTimer);
+            response(this.assessInfo);
+          } else if (monitorCounter++ > 100) {
+            clearInterval(checkTimer);
+            response("Front End Tax Search is Failed");
+          }
+        };
+        let checkTimer = setInterval(checkTaxDetailsResult, 100);
+        return true;
+      }
+    });
+  },
+
+  /// 从前台旁边的网页接受信息的事件句柄
+  onWindowPostMessage: function () {
+    window.addEventListener("message", (event) => {
+      if (
+        event.origin.indexOf(
+          "https://bcres.paragonrels.com/ParagonLS/Search/Tax.mvc?DBid=1&countyID=1&searchID=tab1_1"
+        )
+      ) {
+        event.source.postMessage(this.assessInfo, event.origin);
+      }
+    });
+  },
+
+  /// 方法
   getTaxReportDetails: function () {
     /// 读取地税和评估报告中的字段, 转入数组x0
     var x0 = $("div#" + divContainerID)
@@ -183,77 +315,8 @@ let taxDetails = {
             this.recentSaleType = x0[i + 4].textContent;
             break;
         }
-
-        // if (x0[i].textContent == "Prop Address") {
-        //   this.address = x0[i + 1].textContent;
-        //   if (x0[i + 2].textContent != "Jurisdiction") {
-        //     this.address += x0[i + 2].textContent;
-        //   }
-        // }
-        // if (x0[i].textContent == "PropertyID") {
-        //   this.pid = x0[i + 1].textContent;
-        // }
-        // if (x0[i].textContent == "Tax Year") {
-        //   this.taxYear = x0[i + 1].textContent;
-        // }
-        // if (x0[i].textContent == "Gross Taxes") {
-        //   this.grossTaxes = x0[i + 1].textContent;
-        // }
-        // if (x0[i].textContent == "Actual Totals") {
-        //   let landValue = x0[i + 4].textContent;
-        //   /// 如果landValue为$0.00, 则这是一个新建物业, 数据信息不全
-        //   if (landValue == "$0.00") {
-        //     this.newTaxAssessRecord = true;
-        //     this.landValue = 0;
-        //     this.improvementValue = 0;
-        //     this.totalValue = 0;
-        //   } else {
-        //     this.newTaxAssessRecord = false;
-        //     this.landValue = x0[i + 4].textContent;
-        //     this.improvementValue = x0[i + 5].textContent;
-        //     this.totalValue = x0[i + 6].textContent;
-        //   }
-        // }
-        // if (x0[i].textContent == "PlanNum") {
-        //   this.planNum = x0[i + 9].textContent;
-        // }
-        // // ADD LEGAL FULLDESCRIPTION
-        // if (x0[i].textContent == "Legal Information") {
-        //   this.legal = x0[i + 1].textContent;
-        // }
-        // if (x0[i].textContent == "BCA Description") {
-        //   this.bcaDescription = x0[i + 1].textContent;
-        // }
-        // if (x0[i].textContent == "BCAData Update") {
-        //   this.bcaDataUpdateDate = x0[i + 1].textContent;
-        //   let bcaYear = new Date(this.bcaDataUpdateDate);
-        //   let currentTaxYear = bcaYear.getFullYear(); /// USE BCA UPDATE DATE AS CURRENT TAX YEAR
-        //   this.taxYear = currentTaxYear;
-        //   chrome.storage.local.set({ taxYear: currentTaxYear }); /// PERSIST CURRENT TAX YEAR
-        // }
-        // if (x0[i].textContent == "Lot Size") {
-        //   this.lotSize = x0[i + 1].textContent;
-        // }
-        // if (x0[i].textContent == "BCA Description") {
-        //   this.bcaDescription = x0[i + 1].textContent;
-        // }
-        // //ADD RECENT SALES RECORDS
-        // if (x0[i].textContent == "SaleTransaction Type") {
-        //   this.recentSaleDate = x0[i + 1].textContent;
-        //   this.recentSalePrice = x0[i + 2].textContent;
-        //   this.recentSaleDocNum = x0[i + 3].textContent;
-        //   this.recentSaleType = x0[i + 4].textContent;
-        // }
       }
     }
-    // if (!this.totalValue) {
-    //   this.newTaxAssessRecord = true;
-    //   this.landValue = 0;
-    //   this.improvementValue = 0;
-    //   this.totalValue = 0;
-    // } else {
-    //   this.newTaxAssessRecord = false;
-    // }
   },
 
   getAssessClass: function (reportTitleClass) {

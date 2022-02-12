@@ -18,6 +18,18 @@ chrome.tabs.promise = {
       });
     });
   },
+  sendMessage: async (tabID, messages) => {
+    return new Promise((resolve, reject) => {
+      chrome.tabs.sendMessage(tabID, messages, null, (res) => {
+        let err = chrome.runtime.lastError;
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  },
 };
 
 /// 增加promise外包层, 把callback函数分离出来

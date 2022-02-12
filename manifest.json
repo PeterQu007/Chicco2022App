@@ -23,6 +23,7 @@
       "./assets/scripts/modules/Database.js",
       "./assets/scripts/modules/chrome-storage-promise.js",
       "./assets/scripts/modules/chrome-tabs-promise.js",
+      "./assets/scripts/modules/chrome-runtime-promise.js",
       "./background/searchTax.js",
       "./background/eventPage.js"
       // "./temp/scripts/EventPage.js"
@@ -115,6 +116,9 @@
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
+        "./assets/scripts/modules/chrome-storage-promise.js",
+        "./assets/scripts/modules/chrome-runtime-promise.js",
+        // "./assets/scripts/modules/chrome-tabs-promise.js",
         "./content/TaxSearchDetails.js"
       ],
       "all_frames": true
@@ -185,6 +189,7 @@
         // "./assets/lib/react/react-dom.development.js",
         "./assets/scripts/modules/chrome-storage-promise.js",
         //"./assets/scripts/modules/chrome-tabs-promise.js",
+        "./assets/scripts/modules/chrome-runtime-promise.js",
         "./assets/scripts/modules/AddressInfo.js",
         "./assets/scripts/modules/Assessment.js",
         "./assets/scripts/modules/Complex.js",

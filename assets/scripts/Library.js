@@ -46,6 +46,10 @@
     convertStringToDecimal: function (strNum, keepFraction) {
       //convert Number String To Decimal number
       //example: "$345,890.78" --> 345890
+      // 检测参数是否为空
+      if (!strNum) {
+        return null;
+      }
       var result = 0,
         sign = "",
         numbers = "";
@@ -373,6 +377,28 @@
         } else {
           return "#";
         }
+      }
+    },
+
+    normalizePID: function (pid) {
+      let pidRegex = /\d{3}-\d{3}-\d{3}/g; // 设定pid的格式为ddd-ddd-ddd
+      let c = "";
+      let normalizedPID = "";
+      ///STANDARDIZE PID, ONLY KEEP NUMBERS AND DASH CHARACTER
+      for (let n = 0; n < pid.length; n++) {
+        c = pid[n];
+        if (c == "-") {
+          normalizedPID += c;
+          continue;
+        }
+        if (parseInt(c) >= 0 && parseInt(c) <= 9) {
+          normalizedPID += c;
+        }
+      }
+      if (pidRegex.test(normalizedPID)) {
+        return normalizedPID;
+      } else {
+        return false;
       }
     },
 

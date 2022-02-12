@@ -5,6 +5,8 @@ class QueryTaxAndAssess {
   // 向CouchDB或者前端地税查询网页查询物业的地税和评估信息
   constructor(request, db) {
     this.request = request;
+    this.PID = request.PID;
+    this.taxYear = request.taxYear;
     this.dbAssess = db;
   }
 
@@ -14,8 +16,8 @@ class QueryTaxAndAssess {
   getAssessInfoPromise() {
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(["PID", "taxYear"], async (result) => {
-        taxYear = result.taxYear;
-        let taxID = result.PID + "-" + taxYear;
+        taxYear = this.taxYear;
+        let taxID = this.PID + "-" + taxYear;
         let requester = this.request.from;
 
         try {

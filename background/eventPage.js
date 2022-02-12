@@ -22,6 +22,7 @@ var complexInfoSearchResult = null;
 var mlsTable = [];
 var assessInfo = null;
 let queryTaxAndAssess = null;
+let result = null;
 
 console.clear();
 
@@ -72,7 +73,7 @@ chrome.windows.getCurrent((w) => {
   );
 
   //receive message from iframes, then transfer the message to Main Page content script
-  chrome.runtime.onMessage.addListener(async function (
+  chrome.runtime.onMessage.addListener(function (
     request,
     sender,
     sendResponse
@@ -138,54 +139,21 @@ chrome.windows.getCurrent((w) => {
       sendResponse("switchTab done!!!");
     }
 
+    /// 地税查询模块
     switch (request.todo) {
       // CouchDB数据库 - 处理查询和保存地税/评估数据程序模块
       case "taxSearch":
-        // get request to search tax info of Property with PID saved to storage
-        // 查询请求来自前端paragon的Full Realtor Report 或者是 搜索结果列表 Spreadsheet Report
-        // 纳税年份, 应该使用当前年份.
-        // 测试async/await Class QueryTaxAndAssess
-        queryTaxAndAssess = new QueryTaxAndAssess(request, db);
-        try {
-          assessInfo = await queryTaxAndAssess.getAssessInfoPromise();
-          console.log(assessInfo);
-          // 发送数据包
-          try {
-            let resp = await chrome.storage.promise.local.set(assessInfo);
-            console.log(resp);
-            sendResponse(">>>tax search has been processed in EventPage: ");
-          } catch (err) {
-            // 发送数据包错误处理
-            console.log(err);
-          }
-        } catch (err) {
-          // CouchDB 数据库中没有地税数据
-          let tabs = await chrome.tabs.promise.query({
-            active: true,
-            windowId: null,
-          });
-          chrome.tabs.sendMessage(tabs[0].id, {
-            todo: "taxSearchFor" + request.from,
-          });
-          sendResponse(
-            ">>>tax search has been sent to front end query service: "
-          );
-        }
-        return;
+        searchTax(request, db).then(sendResponse);
+        return true;
+      case "searchTaxFromCouchDB":
+        searchTaxFromCouchDB(request, db).then(sendResponse);
+        return true;
+      case "searchTaxFromRemoteDB":
+        searchTaxFromRemoteDB(request).then(sendResponse);
+        return true;
       case "saveTax":
-        //console.log(">>>I got save tax info: ");
-        var assess = request.taxData;
-        assess._id = assess.PID + "-" + assess.taxYear;
-        // db.writeAssess(assess);
-        queryTaxAndAssess = new QueryTaxAndAssess(request, db);
-        try {
-          let resp = await queryTaxAndAssess.setAssessInfoPromise(assess);
-          console.log(resp);
-        } catch (err) {
-          console.log(err);
-        }
-        sendResponse(assess);
-        return;
+        saveTax(request, db).then(sendResponse);
+        return true;
     }
 
     if (request.todo == "searchStrataPlanSummary") {
@@ -507,32 +475,6 @@ chrome.windows.getCurrent((w) => {
           );
         });
       });
-
-      // chrome.tabs.query(
-      //   {
-      //     active: true,
-      //     currentWindow: true,
-      //   },
-      //   function (tabs) {
-      //     chrome.tabs.sendMessage(
-      //       tabs[0].id,
-      //       {
-      //         todo: "addLock",
-      //         tabID: request.tabID,
-      //       },
-      //       function (response) {
-      //         result = response;
-      //         console.log("addLock response:", response);
-      //         // chrome.storage.local.set(
-      //         // 	{getTabID:result.tabID,
-      //         // 	getTabTitle:result.tabTitle,
-      //         // 	todo: 'getTabTitle'+Math.random().toFixed(8),
-      //         // 	from: 'EventPage.getTabTitle'});
-      //         sendResponse(response);
-      //       }
-      //     );
-      //   }
-      // );
     }
     // "https://pidrealty.local/wp-content/themes/pidHomes-PhaseI/db/dbAddSubjectProperty.php"
     if (request.todo == "saveSubjectInfo") {
@@ -598,119 +540,121 @@ chrome.windows.getCurrent((w) => {
       sendResponse(listingInfo);
     }
 
-    return true;
+    // return true;
   });
 
   //End of Main Function
 })();
 
-// OBSOLETE CODES ////////////////////////////////////
-// tax search callback version:
-// try {
-//   chrome.storage.local.get(["PID", "taxYear"], function (result) {
-//     //check database, if assess exist, send it back
-//     //console.log(">>>PID is: ", result.PID);
-//     taxYear = result.taxYear; // 纳税年份有调用程序, 设定在local storage中
-//     var taxID = result.PID + "-" + taxYear;
-//     var requester = request.from;
-//     db.readAssess(taxID, function (assess) {
-//       //console.log(">>>read from , assess is: ", assess)
-//       //读取地税/评估数据
-//       if (!assess._id) {
-//         // 如果数据库中没有该年的地税/评估数据, 则发送请求去地税查询程序
-//         //other wise , send out tax research command:
-//         try {
-//           console.info("Chrome Tab ID is: ", chromeTabID);
-//           // 从后端向前端发送请求, 需要使用chrome.tabs.sendmessage()
-//           // TODO 计划改为 async/await
-//           chrome.windows.getCurrent((w) => {
-//             chrome.tabs.query(
-//               {
-//                 active: true,
-//                 windowId: w.id,
-//               },
-//               function (tabs) {
-//                 console.warn("taxSearch get chrome tabs:", tabs);
-//                 if (tabs.length > 0) {
-//                   chrome.tabs.sendMessage(tabs[0].id, {
-//                     todo: "taxSearchFor" + requester,
-//                   });
-//                 } else {
-//                   if (
-//                     String(assess.from).indexOf(
-//                       "taxSearchFor" + requester
-//                     ) < 0
-//                   ) {
-//                     assess.from =
-//                       assess.from + "-taxSearchFor" + requester;
-//                   }
-//                   assess.from += "-TaxSearchFailed";
-//                   // 发送数据, 是否引发前端程序不需要的动作??
-//                   chrome.storage.local.set(assess);
-//                 }
-//               }
-//             );
-//           });
-//         } catch (err) {
-//           console.error("taxSearch Errors: ", err);
-//         }
-//       } else {
-//         // 在CouchDB中查询到地税/评估数据
-//         // CouchDB中的数据如果是没有用的空记录, 就需要重新查询
-//         if (String(assess.bcaSearch).indexOf("failed") > -1) {
-//           if (String(assess.addedDate).indexOf($today) > -1) {
-//             // 如果今天已经查过了, 就不要再重复查询了. 因为Paragon不会这么快有更新.
-//             assess.from =
-//               assess.from + "-TaxSearchFailed-taxSearchFor" + requester;
-//           } else {
-//             //Re-Search the tax Data EveryDay
-//             // 如果是过去曾经查询过, 现在可以再试一下
-//             // 同样还是发送查询请求到前端
-//             try {
-//               console.info("Chrome Tab ID is: ", chromeTabID);
-//               chrome.windows.getCurrent((w) => {
-//                 chrome.tabs.query(
-//                   {
-//                     active: true,
-//                     windowId: w.id,
-//                   },
-//                   function (tabs) {
-//                     console.warn("taxSearch get chrome tabs:", tabs);
-//                     if (tabs.length > 0) {
-//                       // 向前端地税/评估查询程序发出服务请求
-//                       chrome.tabs.sendMessage(tabs[0].id, {
-//                         todo: "taxSearchFor" + requester,
-//                       });
-//                     } else {
-//                       if (
-//                         String(assess.from).indexOf(
-//                           "taxSearchFor" + requester
-//                         ) < 0
-//                       ) {
-//                         assess.from =
-//                           assess.from + "-taxSearchFor" + requester;
-//                       }
-//                       assess.from += "-TaxSearchFailed";
-//                       chrome.storage.local.set(assess);
-//                     }
-//                   }
-//                 );
-//               });
-//             } catch (err) {
-//               console.error("taxSearch Errors: ", err);
-//             }
-//           }
-//         } else if (
-//           String(assess.from).indexOf("taxSearchFor" + requester) < 0
-//         ) {
-//           assess.from = assess.from + "-taxSearchFor" + requester;
-//         }
-//         // 发送地税/评估数据包
-//         chrome.storage.local.set(assess);
-//       }
-//     });
-//   });
-//   sendResponse(">>>tax search has been processed in EventPage: ");
-// } catch (err) {
-//   sendResponse(">>>tax search gets errors in EventPage: ");
-// }
+////////////////////////////////////////////////
+/// 子程序模块 ///
+///////////////////////////////////////////////
+
+async function searchTax(request, db) {
+  // get request to search tax info of Property with PID saved to storage
+  // 查询请求来自前端paragon的Full Realtor Report 或者是 搜索结果列表 Spreadsheet Report
+  // 纳税年份, 应该使用当前年份.
+  // 测试async/await Class QueryTaxAndAssess
+  queryTaxAndAssess = new QueryTaxAndAssess(request, db);
+  try {
+    assessInfo = await queryTaxAndAssess.getAssessInfoPromise();
+    console.log(assessInfo);
+    // 发送数据包
+    // let resp = await chrome.storage.promise.local.set(assessInfo);
+    result = {
+      msg: ">>> Tax Search Result From CouchDB <<<",
+      data: assessInfo,
+    };
+    return result;
+  } catch (err) {
+    // CouchDB 数据库中没有地税数据
+    let tabs = await chrome.tabs.promise.query({
+      active: true,
+      windowId: null,
+    });
+    // chrome.tabs.sendMessage(tabs[0].id, {
+    //   todo: "taxSearchFor" + request.from,
+    // });
+    result = await chrome.tabs.promise.sendMessage(tabs[0].id, {
+      todo: "taxSearchFor" + request.from,
+    });
+    console.log(result);
+    assessInfo = await chrome.tabs.promise.sendMessage(tabs[0].id, {
+      todo: "getTaxSearchDetailsFromFrontService",
+    });
+
+    result = {
+      msg: ">>> Tax Search Return From Front Service <<<",
+      data: assessInfo,
+    };
+    return result;
+  }
+}
+
+async function searchTaxFromCouchDB(request, db) {
+  // 从CouchDB中查询地税数据
+  let queryTaxAndAssess = new QueryTaxAndAssess(request, db);
+  let result = null;
+  try {
+    let assessInfo = await queryTaxAndAssess.getAssessInfoPromise();
+    console.log(`#${request.searchSequenceNo}`, assessInfo);
+    // 发送数据包
+    // let resp = await chrome.storage.promise.local.set(assessInfo);
+    result = {
+      msg: ">>> Tax Search Result From CouchDB <<<",
+      status: "OK",
+      data: assessInfo,
+    };
+    return result;
+  } catch (err) {
+    result = {
+      msg: ">>> Tax Search Result From CouchDB <<<",
+      status: err.status,
+      data: err,
+    };
+    return result;
+  }
+}
+
+async function searchTaxFromRemoteDB(request) {
+  // 向前端发出查询请求
+  let tabs = await chrome.tabs.promise.query({
+    active: true,
+    windowId: null,
+  });
+
+  // BCA Page 1 发出查询请求
+  let resultInfo = await chrome.tabs.promise.sendMessage(tabs[0].id, {
+    todo: "taxSearchFor" + request.from,
+    PID: request.PID,
+    taxYear: request.taxYear,
+  });
+  let assessInfo = resultInfo.data; /// assessInfo 保存在data属性中
+  console.log(`#${request.searchSequenceNo}`, assessInfo);
+
+  // assessInfo = await chrome.tabs.promise.sendMessage(tabs[0].id, {
+  //   todo: "getTaxSearchDetailsFromFrontService",
+  // });
+
+  let result = {
+    msg: ">>> Tax Search Return From Front Service <<<",
+    status: "OK",
+    data: assessInfo,
+  };
+  return result;
+}
+
+async function saveTax(request, db) {
+  //console.log(">>>I got save tax info: ");
+  var assess = request.taxData;
+  assess._id = assess.PID + "-" + assess.taxYear;
+  // db.writeAssess(assess);
+  queryTaxAndAssess = new QueryTaxAndAssess(request, db);
+  try {
+    let resp = await queryTaxAndAssess.setAssessInfoPromise(assess);
+    console.log(resp);
+  } catch (err) {
+    console.log(err);
+  }
+  return assess;
+}
