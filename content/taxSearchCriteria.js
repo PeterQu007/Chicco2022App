@@ -34,24 +34,24 @@ let fillPIDField = (pid) => {
 };
 fillPIDField("000-000-000");
 
-/// 获取地税详细数据报表的框架网页元素
-let taxDetailsFrame = top.document
-  .getElementById("tab1_1_2")
-  .contentDocument.getElementById("ifView");
-/// 发送信息
-if (taxDetailsFrame) {
-  taxDetailsFrame.contentWindow.postMessage("Send Back TaxInfo");
-}
-/// 等待回信
-window.addEventListener("message", (event) => {
-  if (
-    event.origin.indexOf(
-      "https://bcres.paragonrels.com/ParagonLS/Reports/TaxReport.mvc?listingIDs"
-    )
-  ) {
-    console.log(event.data);
-  }
-});
+// /// 获取地税详细数据报表的框架网页元素
+// let taxDetailsFrame = top.document
+//   .getElementById("tab1_1_2")
+//   .contentDocument.getElementById("ifView");
+// /// 发送信息
+// if (taxDetailsFrame) {
+//   taxDetailsFrame.contentWindow.postMessage("Send Back TaxInfo");
+// }
+// /// 等待回信
+// window.addEventListener("message", (event) => {
+//   if (
+//     event.origin.indexOf(
+//       "https://bcres.paragonrels.com/ParagonLS/Reports/TaxReport.mvc?listingIDs"
+//     )
+//   ) {
+//     console.log(event.data);
+//   }
+// });
 
 /// 地税查询事件句柄, 处理后台background page eventPage.js发来的地税查询请求
 chrome.runtime.onMessage.addListener(function (msg, sender, response) {
@@ -62,12 +62,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
   /// 填入PID号码, 触发记录数量的查询操作
   fillPIDField(msg.PID);
 
+  let $count = $("#CountResult");
   var monitorCounter = 1;
   var checkCountResultTimer = setInterval(checkTaxCountResult, 100);
 
   function checkTaxCountResult() {
     /// 功能说明, 等待记录数量的查询结果
-    let $count = $("#CountResult");
 
     if (parseInt($count.val()) == 1) {
       /// 如果记录数量显示为1, 表明该PID有当前的地税记录
@@ -79,46 +79,45 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
       /// 等待和返回查询结果
       waitTaxDetails(response);
     } else if (parseInt($count.val()) == 0 || monitorCounter++ > 100) {
+      /// 查询失败的处理代码
       clearInterval(checkCountResultTimer);
-      console.log("[] Tax Search Failed Or Timeout! [monitorCounter]");
-      ///  向后台请求方返回数据
-      let assess = {
-        _id: msg.PID + "-" + msg.taxYear,
-        landValue: 0,
-        improvementValue: 0,
-        totalValue: 0,
-        planNum: "",
-        PID: msg.PID,
-        taxYear: msg.taxYear,
-        bcaSearch: "failed",
-        from:
-          "assess-" + msg.todo + "-TaxSearchFailed" + Math.random().toFixed(8),
-        dataFromDB: false,
-      };
-      chrome.storage.local.set(assess, function () {
-        console.log("Tax Search Failed...", assess);
-      });
-      /// 向后台请求方, 发出保存数据的指令
-      chrome.runtime.sendMessage(
-        {
-          todo: "saveTax",
-          taxData: assess,
-        },
-        function (response) {
-          console.log("tax Data has been save to the database!", response);
-        }
-      );
-      response("mls-tax could not find a tax record");
+      console.log(`[] Tax Search Failed Or Timeout! [${monitorCounter}]`);
+      ///  处理查询失败, 并向后台请求方返回数据
+      processFailedSearch(msg, response);
     }
     console.log("Waiting for tax Search result...", checkCountResultTimer);
   }
   return true;
 });
 
+///////////////////////////////////////////////
+/// 功能函数 ///
+///////////////////////////////////////////////
+
 function waitTaxDetails(response) {
   /// 功能说明: 等待Tax Details
+  /// 本模块每次查询只执行一次
+  /// 取得地税数据后, 移除事件句柄
   let checkTaxDetailsSearchTimer = setInterval(taxDetails, 350);
   let waitingDetailsCounter = 0;
+
+  /// 定义间隔查询结果程序
+  function taxDetails() {
+    waitingDetailsCounter++;
+    console.log(
+      `[] waiting for detailed tax info counter : [${checkTaxDetailsSearchTimer}]`
+    );
+    if (waitingDetailsCounter > 100) {
+      /// 避免等待过久, 陷入死循环
+      clearInterval(checkTaxDetailsSearchTimer);
+      let assessInfo = {
+        msg: `[] Tax Remote Search Timeout [${waitingDetailsCounter}]`,
+        data: null,
+        status: "timeout",
+      };
+      response(assessInfo);
+    }
+  }
 
   /// 添加事件句柄
   window.addEventListener("message", eventHandler);
@@ -142,22 +141,39 @@ function waitTaxDetails(response) {
       window.removeEventListener("message", eventHandler);
     }
   }
+}
 
-  /// 定义间隔查询结果程序
-  function taxDetails() {
-    waitingDetailsCounter++;
-    console.log(
-      `[] waiting for detailed tax info counter : [${checkTaxDetailsSearchTimer}]`
-    );
-    if (waitingDetailsCounter > 100) {
-      /// 避免等待过久, 陷入死循环
-      clearInterval(checkTaxDetailsSearchTimer);
-      let assessInfo = {
-        msg: `[] Tax Remote Search Timeout [${waitingDetailsCounter}]`,
-        data: null,
-        status: "timeout",
-      };
-      response(assessInfo);
+function processFailedSearch(msg, response) {
+  /// 功能说明: 处理失败的地税查询
+  let assess = {
+    _id: msg.PID + "-" + msg.taxYear,
+    landValue: 0,
+    improvementValue: 0,
+    totalValue: 0,
+    planNum: "",
+    PID: msg.PID,
+    taxYear: msg.taxYear,
+    bcaSearch: "failed",
+    from: "assess-" + msg.todo + "-TaxSearchFailed" + Math.random().toFixed(8),
+    dataFromDB: false,
+  };
+  let assessInfo = {
+    msg: "[] No Tax Record Found []",
+    data: assess,
+    status: "failed",
+  };
+  chrome.storage.local.set(assess, function () {
+    console.log("Tax Search Failed...", assess);
+  });
+  /// 向后台请求方, 发出保存数据的指令
+  chrome.runtime.sendMessage(
+    {
+      todo: "saveTax",
+      taxData: assess,
+    },
+    function (response) {
+      console.log("tax Data has been save to the database!", response);
     }
-  }
+  );
+  response(assessInfo);
 }
