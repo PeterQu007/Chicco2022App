@@ -2,7 +2,7 @@
 /// COMPLETE THE INFORMATION IN THE SPREADSHEET.TABLE BY ADDING BCA.TAX.INFORMATION
 /// LOOK FOR COMPLEX.NAME, LAND.TAX.VALUE, IMPROVEMENT.TAX.VALUE, TOTAL.TAX.VALUE
 /// COMPUTE PRICE.CHANGE.PERCENTAGE VS TOTAL.TAX.VALUE
-//// ADD STRATA.PLAN.COLUMN
+/// ADD STRATA.PLAN.COLUMN
 /// NORMALIZE CIVIC.ADDRESS, COMPLEX.NAME
 
 /// Residential Attached, Detached & Land Listing Search Results Page (Tab3/4/5_?_2),
@@ -82,7 +82,7 @@ var computeSFPrices = {
       let updateWPViewName = "Update WP View";
       if (searchViewName.indexOf(listingExtraInfo) > -1) {
         /// 事件侦听程序模块
-        this.onTaxSearch(); ///TAX.SEARCH EVENT
+        // this.onTaxSearch(); ///TAX.SEARCH EVENT
         /// this.onConnect(); ///long live port
         this.onMutation(); ///SPREADSHEET.TABLE READY EVENT
         this.onComplexSearch(); ///COMPLEX.NAME.SEARCH EVENT
@@ -285,52 +285,52 @@ var computeSFPrices = {
   /// 查询地税的程序模块 ///
   //////////////////////////////////////////////////////////////////////////////
 
-  onTaxSearch: function (taxSearchInterval) {
-    /// DEFINE THE TAX.SEARCH EVENT, 地税搜索间隔为50ms
-    /// 句柄功能: 根据chrome缓存库里面数据的变化, 侦听地税搜索的结果
-    /// 更新网页表格内相关的设置, 比如地址单元加上**号, 表示地税搜索的进度
-    (function onEvents(self) {
-      chrome.storage.onChanged.addListener(function (changes, area) {
-        let frameVisible = self.getVisibility();
-        /// 检查是否允许进行地税搜索
-        /// 1: 人工标记stopSearch 2: 父级框架网页和同级框架页是否可见  classList.contains("ui-tabs-hide")
-        /// 举例: tab4_1和tab4_2是同级别div元素, tab4是父级框架页
-        if (
-          self.$spreadSheet.css("display") == "none" ||
-          !frameVisible ||
-          self.stopSearch.is(":checked")
-        ) {
-          /// 新增加Visibie控制, 如果搜索价格不可见, 不执行地税查询
-          // alert("No Tax Search For this property");
-          console.log("No Tax Search For this property");
-          return;
-        }
-        if (
-          area == "local" &&
-          "from" in changes &&
-          changes.from.newValue.indexOf("assess") > -1 &&
-          changes.from.newValue.indexOf("ForSpreadSheet") > -1
-        ) {
-          console.log(
-            "==>Spreadsheet - TAX SEARCH EVENT: ",
-            changes.from.newValue
-          );
-          if (changes.from.newValue.indexOf("-TaxSearchFailed") > -1) {
-            self.updateAssessWhenTaxSearchFailed();
-          } else {
-            self.updateAssess();
-          }
-          setTimeout(
-            function () {
-              ///LOOP THE TAX.SEARCH IN THE SPREADSHEET.TABLE
-              this.searchTax();
-            }.bind(self),
-            taxSearchInterval ?? 50
-          );
-        }
-      });
-    })(this);
-  },
+  // onTaxSearch: function (taxSearchInterval) {
+  //   /// DEFINE THE TAX.SEARCH EVENT, 地税搜索间隔为50ms
+  //   /// 句柄功能: 根据chrome缓存库里面数据的变化, 侦听地税搜索的结果
+  //   /// 更新网页表格内相关的设置, 比如地址单元加上**号, 表示地税搜索的进度
+  //   (function onEvents(self) {
+  //     chrome.storage.onChanged.addListener(function (changes, area) {
+  //       let frameVisible = self.getVisibility();
+  //       /// 检查是否允许进行地税搜索
+  //       /// 1: 人工标记stopSearch 2: 父级框架网页和同级框架页是否可见  classList.contains("ui-tabs-hide")
+  //       /// 举例: tab4_1和tab4_2是同级别div元素, tab4是父级框架页
+  //       if (
+  //         self.$spreadSheet.css("display") == "none" ||
+  //         !frameVisible ||
+  //         self.stopSearch.is(":checked")
+  //       ) {
+  //         /// 新增加Visibie控制, 如果搜索价格不可见, 不执行地税查询
+  //         // alert("No Tax Search For this property");
+  //         console.log("No Tax Search For this property");
+  //         return;
+  //       }
+  //       if (
+  //         area == "local" &&
+  //         "from" in changes &&
+  //         changes.from.newValue.indexOf("assess") > -1 &&
+  //         changes.from.newValue.indexOf("ForSpreadSheet") > -1
+  //       ) {
+  //         console.log(
+  //           "==>Spreadsheet - TAX SEARCH EVENT: ",
+  //           changes.from.newValue
+  //         );
+  //         if (changes.from.newValue.indexOf("-TaxSearchFailed") > -1) {
+  //           self.updateAssessWhenTaxSearchFailed();
+  //         } else {
+  //           self.updateAssess();
+  //         }
+  //         setTimeout(
+  //           function () {
+  //             ///LOOP THE TAX.SEARCH IN THE SPREADSHEET.TABLE
+  //             this.searchTax();
+  //           }.bind(self),
+  //           taxSearchInterval ?? 50
+  //         );
+  //       }
+  //     });
+  //   })(this);
+  // },
 
   /// 对象的方法 METHODS
 
@@ -414,6 +414,12 @@ var computeSFPrices = {
           console.log(searchResult.data); /// assessInfo
           self.table[unTaxed][10] = true; /// 设置查询完成标记
           self.updateAssess(searchResult.data);
+          continue;
+        } else {
+          /// 查询失败 failed or timeout
+          console.log(searchResult.msg);
+          self.table[unTaxed][10] = true; /// 设置查询完成标记
+          self.updateAssessWhenTaxSearchFailed(searchResult.data);
           continue;
         }
       } catch (err) {
@@ -602,91 +608,83 @@ var computeSFPrices = {
     );
   },
 
-  updateAssessWhenTaxSearchFailed: function () {
+  updateAssessWhenTaxSearchFailed: async function (assessInfo) {
     ///FOR NO BC.TAX.RECORD
     ///BC.TAX.RECORD SHOWS TAX.VALUE = 0
     var self = this;
 
-    chrome.storage.local.get(
-      [
+    if (!assessInfo) {
+      assessInfo = await chrome.storage.promise.local.get([
         "PID",
         "totalValue",
         "improvementValue",
         "landValue",
-        "address",
         "planNum",
-        "dataFromDB",
-      ],
-      function (result) {
-        var pid = result.PID;
-        var totalValue = result.totalValue;
-        var improvementValue = result.improvementValue;
-        var landValue = result.landValue;
-        var planNum = result.planNum.trim();
-        var formalAddress = result.address.trim();
-        var houseType = "";
-        var aInfo = null;
-        var dataFromDB = result.dataFromDB;
+      ]);
+    }
 
-        var i = 0;
-        var price = 0;
-        var rowNumbers = self.rowNumbers;
-        for (i = 0; i < self.table.length; i++) {
-          if (pid == self.table[i][4]) {
-            self.table[i][5] = landValue;
-            self.table[i][6] = improvementValue;
-            self.table[i][7] = totalValue;
-            self.table[i][9] = planNum;
-            self.table[i][10] = true; // tax done
-            houseType = self.table[i][14]; //fetch houseType
+    var pid = assessInfo.PID;
+    var totalValue = assessInfo.totalValue;
+    var improvementValue = assessInfo.improvementValue;
+    var landValue = assessInfo.landValue;
+    var planNum = assessInfo.planNum.trim();
+    var formalAddress;
+    var houseType = "";
+    var aInfo = null;
 
-            if (planNum) {
-              aInfo = new AddressInfo(formalAddress, houseType, true);
-              self.table[i][16] = planNum + aInfo.addressID; ////complexID
-            } else {
-              //format the address of table col 13:
-              aInfo = new AddressInfo(
-                /*address col 13 */
-                self.table[i][13],
-                /*houseType col 14*/
-                self.table[i][14]
-              );
-              formalAddress = aInfo.formalAddress;
-              planNum = "NPN"; ////NPN STANDS FOR NO.PLAN.NUMBER
-              self.table[i][9] = "NPN"; ////UPDATE THE TABLE CELL FOR PLAN.NUMBER
-              self.table[i][16] =
-                /*planNum need to get from legalDescription */
-                planNum + aInfo.addressID; //complexID
-            }
+    var i = 0;
+    var price = 0;
+    var rowNumbers = self.rowNumbers;
+    for (i = 0; i < self.table.length; i++) {
+      if (pid == self.table[i][4]) {
+        assessInfo.address = self.table[i][13]; // 使用原有的地址
+        formalAddress = assessInfo.address.trim(); // 整理地址
+        self.table[i][5] = landValue;
+        self.table[i][6] = improvementValue;
+        self.table[i][7] = totalValue;
+        self.table[i][9] = planNum;
+        self.table[i][10] = true; // tax done
+        houseType = self.table[i][14]; //fetch houseType
 
-            self.table[i][14] = aInfo.houseType;
-            self.table[i][17] = aInfo.streetAddress;
-            self.table[i][18] = aInfo.UnitNo;
-
-            self.table[i][13] = formalAddress; // formal address from tax search
-            price = parseInt(self.table[i][1]);
-
-            rowNumbers.push(self.table[i][0]);
-
-            var changeValue = 0;
-            var changeValuePercent = 0;
-            self.table[i][8] = changeValuePercent;
-          }
+        if (planNum) {
+          aInfo = new AddressInfo(formalAddress, houseType, true);
+          self.table[i][16] = planNum + aInfo.addressID; ////complexID
+        } else {
+          //format the address of table col 13:
+          aInfo = new AddressInfo(
+            /*address col 13 */
+            self.table[i][13],
+            /*houseType col 14*/
+            self.table[i][14]
+          );
+          formalAddress = aInfo.formalAddress;
+          planNum = "NPN"; ///NPN STANDS FOR NO.PLAN.NUMBER
+          self.table[i][9] = "NPN"; ///UPDATE THE TABLE CELL FOR PLAN.NUMBER
+          self.table[i][16] =
+            /*planNum need to get from legalDescription */
+            planNum + aInfo.addressID; //complexID
         }
 
-        console.log(
-          "SpreadSheet: table & landValue FAILED=> ",
-          /*self.table,*/
-          landValue,
-          rowNumbers.length
-        );
-        var x = $("table#grid tbody");
-        var rows = x.children("tr");
-        var rowNo = self.rowNumbers[self.rowNumbers.length - 1];
-        $($(rows[rowNo]).children("td")[self.cols.Address]).text(
-          self.table[rowNo - 1][13] + "^"
-        );
+        self.table[i][14] = aInfo.houseType;
+        self.table[i][17] = aInfo.streetAddress;
+        self.table[i][18] = aInfo.UnitNo;
+
+        self.table[i][13] = formalAddress; // formal address from tax search
+        price = parseInt(self.table[i][1]);
+
+        rowNumbers.push(self.table[i][0]);
+
+        var changeValue = 0;
+        var changeValuePercent = 0;
+        self.table[i][8] = changeValuePercent;
       }
+    }
+
+    var x = $("table#grid tbody");
+    var rows = x.children("tr");
+    var rowNo = self.rowNumbers[self.rowNumbers.length - 1];
+    $($(rows[rowNo]).children("td")[self.cols.Address]).text(
+      self.table[rowNo - 1][13] + "^"
     );
   },
 

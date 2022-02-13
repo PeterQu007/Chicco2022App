@@ -638,7 +638,7 @@ async function searchTaxFromRemoteDB(request) {
 
   let result = {
     msg: ">>> Tax Search Return From Front Service <<<",
-    status: "OK",
+    status: resultInfo.status ?? "OK",
     data: assessInfo,
   };
   return result;
