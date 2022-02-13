@@ -448,6 +448,11 @@
     },
 
     normalizeComplexName: function (complexName) {
+      const exlcudeWords = ["I", "II", "III", "IV", "TBA"];
+      complexName = complexName.trim();
+      if (!complexName) {
+        return "TBA";
+      }
       var normalizedName = "";
       if (typeof complexName == "string") {
         complexName = complexName.trim();
@@ -456,10 +461,15 @@
         var remainingChar = "";
 
         for (var i = 0; i < nameParts.length; i++) {
-          nameParts[i] = nameParts[i].trim();
-          firstChar = nameParts[i].charAt(0).toUpperCase();
-          remainingChar = nameParts[i].slice(1).toLowerCase().trim();
-          normalizedName += firstChar + remainingChar + " ";
+          nameParts[i] = nameParts[i].trim().toUpperCase();
+          /// 如果这个词汇不是excludeWrods成员
+          if (exlcudeWords.includes(nameParts[i])) {
+            normalizedName += nameParts[i].toUpperCase() + " ";
+          } else {
+            firstChar = nameParts[i].charAt(0).toUpperCase();
+            remainingChar = nameParts[i].slice(1).toLowerCase().trim();
+            normalizedName += firstChar + remainingChar + " ";
+          }
         }
         normalizedName = normalizedName.trim();
       } else {

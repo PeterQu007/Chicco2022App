@@ -318,19 +318,51 @@ class Database {
     //console.groupEnd('writeStrataPlanSummary');
   }
 
-  readComplex_Promise(complexInfo) {
-    //console.group(">>>readComplex");
+  async readComplexPromise(complexInfo) {
+    /// 功能说明: 从CouchDB中查询小区信息
+    /// 如果小区名字不为空
     var self = this;
     self.complex = complexInfo;
     try {
-      let complexDoc = self.dbComplex.get(complexInfo._id);
-      self.complex = complexDoc;
+      let res = await self.dbComplex.get(complexInfo._id);
+      self.complex = res;
       self.complex.from = "complexInfo" + Math.random().toFixed(8);
       return Promise.resolve(self.complex);
     } catch (err) {
-      self.writeComplex(self.complex);
-      self.complex.from = "complexInfo-saved to db-" + Math.random().toFixed(8);
-      return Promise.resolve(self.complex);
+      return Promise.reject(err); // 返回错误信息
+    }
+  }
+
+  async createComplexPromise(complexInfo) {
+    /// 功能说明: 创建小区名字记录
+    var self = this;
+    if (complexInfo.complexName.trim() === "") {
+      /// 如果小区数据里面的名字为空, 则填入TBA
+      complexInfo.complexName = "TBA";
+    }
+    try {
+      let res = await self.dbComplex.put(complexInfo);
+      return Promise.resolve(res);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  async updateComplexPromise(complexInfo) {
+    /// 功能说明: 更新区名字记录
+    var self = this;
+    var complexID = complexInfo._id;
+    var complexName = complexInfo.complexName;
+
+    try {
+      /// 先读取原有的记录, 取得_rev字段
+      let res = await self.dbComplex.get(complexID);
+      /// 更新小区名, 存入数据库
+      res.complexName = complexName.trim() === "" ? "TBA" : complexName;
+      let res2 = await self.dbComplex.put(res);
+      return Promise.resolve(res2);
+    } catch (err) {
+      return Promise.reject(res2);
     }
   }
 

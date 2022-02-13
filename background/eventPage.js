@@ -201,7 +201,18 @@ chrome.windows.getCurrent((w) => {
       sendResponse(">>>complex search has been processed in eventpage: ");
     }
 
-    if (request.todo == "searchComplexInfo") {
+    /// 小区(Complex)信息处理(查询,保存)
+
+    switch (request.todo) {
+      case "processComplexInfo":
+        /// 处理小区名字, 查询标准小区名, 创建新的小区名, 更新小区名
+        processComplexInfo(request).then(sendResponse);
+        return true;
+      case "saveComplexInfo":
+        return true;
+    }
+
+    if (request.todo == "X.searchComplexInfo") {
       var complexID = request._id;
       var requestFrom = request.from;
       delete request.from;
@@ -657,4 +668,59 @@ async function saveTax(request, db) {
     console.log(err);
   }
   return assess;
+}
+
+///////////////////////////////////////////////////
+async function processComplexInfo(complexInfo) {
+  /// 功能说明: 处理小区名
+  /// 查询/更新/创建 标准的小区信息,
+  /// 返回带小区信息的信息包
+  const cNoNames = ["TBA", "::", ""];
+  delete complexInfo.from;
+  let resInfo = null;
+  let resQueryDB = null;
+  let cStandardInfo = null; // 保存数据库中的查询记录
+  let cName = complexInfo.complexName.trim();
+  cName = cNoNames.includes(cName) ? "TBA" : cName; // 整理小区名字, 去除前后空格符
+  complexInfo.complexName = cName; // 待查记录名
+
+  try {
+    cStandardInfo = await db.readComplexPromise(complexInfo); // 读取数据库
+    cNameInDB = cStandardInfo.complexName.trim(); // 已查记录名
+
+    switch (true) {
+      case !cNoNames.includes(cName) && cNoNames.includes(cNameInDB):
+        /// 待查非空, 已查为空 - 更新记录, 返回
+        cStandardInfo.complexName = complexInfo.complexName;
+        resQueryDB = await db.updateComplexPromise(cStandardInfo); // 更新数据库
+        resInfo = {
+          msg: `<> Updated Complex Name: ${cStandardInfo.complexName} <>`,
+          data: cStandardInfo,
+          status: "OK",
+        };
+        return Promise.resolve(resInfo);
+      case cNoNames.includes(cName) && cNoNames.includes(cNameInDB):
+        /// 待查为空, 已查为空 - 改名TBA, 返回
+        cStandardInfo.complexName = "TBA";
+      case cNoNames.includes(cName) && !cNoNames.includes(cNameInDB):
+      case !cNoNames.includes(cName) && !cNoNames.includes(cNameInDB):
+        /// 待查为空, 已查非空 - 直接返回
+        /// 待查非空, 已查非空 - 直接返回
+        resInfo = {
+          msg: `<> Found Complex Name: ${cStandardInfo.complexName} <>`,
+          data: cStandardInfo,
+          status: "OK",
+        };
+        return Promise.resolve(resInfo);
+    }
+  } catch (err) {
+    /// 数据库没有记录, 创建新记录
+    resQueryDB = await db.createComplexPromise(complexInfo);
+    resInfo = {
+      msg: `<> Created Complex Record: ${complexInfo.complexName} <>`,
+      data: complexInfo,
+      status: "OK",
+    };
+    return Promise.resolve(resInfo);
+  }
 }

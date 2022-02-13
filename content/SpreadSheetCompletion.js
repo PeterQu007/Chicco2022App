@@ -85,7 +85,7 @@ var computeSFPrices = {
         // this.onTaxSearch(); ///TAX.SEARCH EVENT
         /// this.onConnect(); ///long live port
         this.onMutation(); ///SPREADSHEET.TABLE READY EVENT
-        this.onComplexSearch(); ///COMPLEX.NAME.SEARCH EVENT
+        // this.onComplexSearch(); ///COMPLEX.NAME.SEARCH EVENT
         /// 增加一个事件侦听, 针对上级Frame的postMessage
         this.onPostMessageFromSumBoxButtons();
       } else {
@@ -352,22 +352,6 @@ var computeSFPrices = {
         self.table[rowNo - 1][13] + "***"
       );
 
-      /// 如果查询到表格尾, 更新表格, 完成循环
-      if (i === self.table.length) {
-        console.log("taxSearch done!");
-        ///START TO SEARCH COMPLEX.NAME
-        this.updateSpreadsheet();
-        ///UPDATE THE STATS
-        var i = 0;
-        for (i = 0; i < self.table.length; i++) {
-          var planNum = self.table[i][9];
-          if (!planNum.trim()) {
-            self.table[i][15] = true; ///BECAUSE OF PLAN.NUMBER ERROR, PASSED THIS RECORD
-          }
-        }
-        self.searchComplex(); //FIRST Complex Search
-      }
-
       /// 执行地税查询
       unTaxed = i;
       var pid = self.table[unTaxed][4];
@@ -432,7 +416,20 @@ var computeSFPrices = {
 
       // break;
     }
-    self.updateSpreadsheet();
+    console.log("taxSearch done!");
+    ///START TO SEARCH COMPLEX.NAME
+    this.updateSpreadsheet();
+    ///UPDATE THE STATS
+    var i = 0;
+    for (i = 0; i < self.table.length; i++) {
+      var planNum = self.table[i][9];
+      if (!planNum.trim()) {
+        self.table[i][15] = false; ///BECAUSE OF PLAN.NUMBER ERROR, PASSED THIS RECORDS
+        self.table[i][9] = "NPN";
+      }
+    }
+    /// 开始查询标准小区名
+    self.searchComplex(); //FIRST Complex Search
   },
 
   updateAssess: async function (assessInfo, searchMode) {
@@ -691,34 +688,37 @@ var computeSFPrices = {
   //////////////////////////////////////////////////////////////////////////////
   /// 小区查询程序模块  Complex Search Code
   //////////////////////////////////////////////////////////////////////////////
-  onComplexSearch: function () {
-    (function onEvents(self) {
-      chrome.storage.onChanged.addListener(function (changes, area) {
-        if (self.$spreadSheet.css("display") == "none") {
-          return;
-        }
-        if (area == "local" && "from" in changes) {
-          if (
-            changes.from.newValue.indexOf("complexInfo") > -1 &&
-            changes.from.newValue.indexOf("spreadSheetCompletion") > -1
-          ) {
-            console.log("====>Spreadsheet : COMPLEX SEARCH EVENT", changes);
-            self.updateComplex();
+  // onComplexSearch: function () {
+  //   (function onEvents(self) {
+  //     chrome.storage.onChanged.addListener(function (changes, area) {
+  //       if (self.$spreadSheet.css("display") == "none") {
+  //         return;
+  //       }
+  //       if (area == "local" && "from" in changes) {
+  //         if (
+  //           changes.from.newValue.indexOf("complexInfo") > -1 &&
+  //           changes.from.newValue.indexOf("spreadSheetCompletion") > -1
+  //         ) {
+  //           console.log("====>Spreadsheet : COMPLEX SEARCH EVENT", changes);
+  //           self.updateComplex();
 
-            setTimeout(
-              function () {
-                //go to next listing for assess date
-                this.searchComplex();
-              }.bind(self),
-              50
-            );
-          }
-        }
-      });
-    })(this);
-  },
+  //           setTimeout(
+  //             function () {
+  //               //go to next listing for assess date
+  //               this.searchComplex();
+  //             }.bind(self),
+  //             50
+  //           );
+  //         }
+  //       }
+  //     });
+  //   })(this);
+  // },
 
-  searchComplex: function () {
+  searchComplex: async function () {
+    /// 处理小区信息(小区名, Complex Name)
+    /// 如果挂牌记录中有小区的名字 - 先查询是否有标准化了的名字, 如果没有记录, 就将现有的名字标准化存入数据库
+    /// 如果挂牌九路中没有小区的名字 - 先查询是否有标准发的名字, 如果没有记录, 就暂时登记为TBA, 存入数据库
     var self = this;
     var i = 0;
     var unSearchComplex = 0;
@@ -729,55 +729,61 @@ var computeSFPrices = {
     var complexID = "";
     var x = $("table#grid tbody");
     var rows = x.children("tr");
+    let complexInfo = null;
     for (i = 0; i < self.table.length; i++) {
-      try {
-        if (!self.table[i][15]) {
-          ///IF NOT YET DONE COMPLEX SEARCH BY CHECKING COMPLEX SEARCH TAG
-          unSearchComplex = i;
-          complexID = self.table[i][16];
-          ////planNum, address, complex, houseType
-          planNum = self.table[i][9];
-          address = self.table[i][13];
-          complexName = $fx.normalizeComplexName(self.table[i][12]);
-          $($(rows[i + 1]).children("td")[self.cols.ComplexName]).text(
-            "**" + self.table[i][12]
-          );
+      if (!self.table[i][15]) {
+        ///IF NOT YET DONE COMPLEX SEARCH BY CHECKING COMPLEX SEARCH TAG
+        unSearchComplex = i;
+        complexID = self.table[i][16];
+        planNum = self.table[i][9];
+        address = self.table[i][13];
+        complexName = $fx.normalizeComplexName(self.table[i][12]); // 标准化小区名
+        $($(rows[i + 1]).children("td")[self.cols.ComplexName]).text(
+          "***" + self.table[i][12] // 显示处理进程
+        );
 
-          houseType = self.table[i][14].toUpperCase();
-          if (houseType == "HOUSE" || houseType == "DETACHED") {
-            ///DETACHED PROPERTY NO NEED TO DO COMPLEX SEARCH
-            self.table[i][12] = self.table[i][9];
-            self.table[i][15] = true;
-            if (i == self.table.length - 1) {
-              console.log("Single House ComplexSearch Done!");
-              self.updateSpreadsheet();
-              // self.postAssessInfo(); // post assess to mySQL for detached properties
-              let assess = new Assessment();
-              assess.postAssessInfos(self.assessInfos, $fx);
-            }
-            continue;
+        houseType = self.table[i][14].toUpperCase();
+        if (houseType === "HOUSE" || houseType === "DETACHED") {
+          /// 独立屋不需要小区信息
+          self.table[i][12] = self.table[i][9];
+          self.table[i][15] = true;
+          if (i === self.table.length - 1) {
+            console.log("Single House ComplexSearch Done!");
+            self.updateSpreadsheet();
+            // self.postAssessInfo(); // post assess to mySQL for detached properties
+            let assess = new Assessment();
+            assess.postAssessInfos(self.assessInfos, $fx);
           }
-          if (!complexID) {
-            // re do complexID
-            var isFormal = true; // this is formal address from tax search
-            var aInfo = new AddressInfo(address, houseType, isFormal); //todo list...
-            complexID = planNum + aInfo.addressID;
-          }
-          ////////////////////////////////////////////
-          var complexInfo = {
-            _id: complexID,
-            name: complexName,
-            todo: "searchComplexInfo",
-            from: "spreadSheetCompletion",
-          };
-
-          chrome.runtime.sendMessage(complexInfo, function (response) {});
-          ////////////////////////////////////////
-          break;
+          continue;
         }
-      } catch (error) {
-        console.error(error);
-        continue;
+
+        /// 处理非独立屋的挂牌记录
+        if (!complexID) {
+          /// 生成规范的ComplexId
+          var isFormal = true; // this is formal address from tax search
+          var aInfo = new AddressInfo(address, houseType, isFormal); //todo list...
+          complexID = planNum + aInfo.addressID;
+        }
+        ////////////////////////////////////////////
+        let msgInfo = {
+          _id: complexID,
+          complexName: $fx.normalizeComplexName(complexName),
+          todo: "processComplexInfo",
+          from: "spreadSheetCompletion",
+        };
+
+        try {
+          /// 处理小区名字, 查询/更新/创建该小区的规范小区名
+          /// 返回包含小区信息的数据包
+          let resultInfo = await chrome.runtime.promise.sendMessage(msgInfo);
+          console.log(resultInfo.msg);
+          /// 把小区名缓存到Table
+          self.updateComplexNew(resultInfo.data);
+        } catch (err) {
+          console.log(err.message);
+          continue;
+        }
+        ////////////////////////////////////////
       }
 
       if (i == self.table.length - 1) {
@@ -856,10 +862,25 @@ var computeSFPrices = {
         if (complexID == self.table[i][16]) {
           console.log("====>Spreadsheet-Complex Updated: ", i);
           self.table[i][12] = complexName;
-          self.table[i][15] = true; ////SETUP THE ROW'S COMPLEX SEARCH SIGN
+          self.table[i][15] = true; ///SETUP THE ROW'S COMPLEX SEARCH SIGN
         }
       }
     });
+  },
+
+  updateComplexNew: function (complexInfo) {
+    var self = this;
+
+    var complexID = complexInfo._id;
+    var complexName = complexInfo.complexName;
+    complexName = $fx.normalizeComplexName(complexName);
+    var i = 0;
+    for (i = 0; i < self.table.length; i++) {
+      if (complexID == self.table[i][16]) {
+        self.table[i][12] = complexName;
+        self.table[i][15] = true; ///SETUP THE ROW'S COMPLEX SEARCH SIGN
+      }
+    }
   },
 
   /////////////////////////////////////////////////////////
