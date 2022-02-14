@@ -72,14 +72,78 @@ chrome.windows.getCurrent((w) => {
     }
   );
 
-  //receive message from iframes, then transfer the message to Main Page content script
+  /// 添加地税/评估数据服务事件句柄
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse
+  ) {
+    let taxCommands = [
+      "taxSearch",
+      "searchTaxFromCouchDB",
+      "searchTaxFromRemoteDB",
+      "saveFailedTaxSearch",
+    ];
+    if (taxCommands.includes(request.todo)) {
+      console.log(
+        `(1.tax) onMessage from: ${$fx.getTabID3(sender.url)} | ${
+          request.from
+        }; todo: ${request.todo} () `
+      );
+    }
+    switch (request.todo) {
+      // CouchDB数据库 - 处理查询和保存地税/评估数据程序模块
+      case "taxSearch":
+        searchTax(request, db).then(sendResponse);
+        return true;
+      case "searchTaxFromCouchDB":
+        searchTaxFromCouchDB(request, db).then(sendResponse);
+        return true;
+      case "searchTaxFromRemoteDB":
+        searchTaxFromRemoteDB(request).then(sendResponse);
+        return true;
+      case "saveFailedTaxSearch":
+        saveFailedTaxSearch(request, db).then(sendResponse);
+        return true;
+    }
+  });
+
+  /// 添加小区名字处理服务事件句柄
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse
+  ) {
+    let complexCommands = ["processComplexInfo", "saveComplexInfo"];
+    if (complexCommands.includes(request.todo)) {
+      console.log(
+        `(2.complex) onMessage from: ${$fx.getTabID3(sender.url)} | ${
+          request.from
+        }; todo: ${request.todo} () `
+      );
+    }
+
+    /// 小区(Complex)信息处理(查询,保存)
+    switch (request.todo) {
+      case "processComplexInfo":
+        /// 处理小区名字, 查询标准小区名, 创建新的小区名, 更新小区名
+        processComplexInfo(request).then(sendResponse);
+        return true;
+      case "saveComplexInfo":
+        let mode = 1; /// 强制更新数据库记录
+        processComplexInfo(request, mode).then(sendResponse);
+        return true;
+    }
+  });
+
+  /// 添加其他后台服务句柄
   chrome.runtime.onMessage.addListener(function (
     request,
     sender,
     sendResponse
   ) {
     console.log(
-      `onMessage.eventPage got a message from: ${request.from}; todo: ${request.todo} `
+      `() onMessage.eventPage got a message from: ${request.from}; todo: ${request.todo} () `
     );
 
     //message from Warning iframe
@@ -140,21 +204,21 @@ chrome.windows.getCurrent((w) => {
     }
 
     /// 地税查询模块
-    switch (request.todo) {
-      // CouchDB数据库 - 处理查询和保存地税/评估数据程序模块
-      case "taxSearch":
-        searchTax(request, db).then(sendResponse);
-        return true;
-      case "searchTaxFromCouchDB":
-        searchTaxFromCouchDB(request, db).then(sendResponse);
-        return true;
-      case "searchTaxFromRemoteDB":
-        searchTaxFromRemoteDB(request).then(sendResponse);
-        return true;
-      case "saveTax":
-        saveTax(request, db).then(sendResponse);
-        return true;
-    }
+    // switch (request.todo) {
+    //   // CouchDB数据库 - 处理查询和保存地税/评估数据程序模块
+    //   case "taxSearch":
+    //     searchTax(request, db).then(sendResponse);
+    //     return true;
+    //   case "searchTaxFromCouchDB":
+    //     searchTaxFromCouchDB(request, db).then(sendResponse);
+    //     return true;
+    //   case "searchTaxFromRemoteDB":
+    //     searchTaxFromRemoteDB(request).then(sendResponse);
+    //     return true;
+    //   case "saveFailedTaxSearch":
+    //     saveFailedTaxSearch(request, db).then(sendResponse);
+    //     return true;
+    // }
 
     if (request.todo == "searchStrataPlanSummary") {
       //get request to search tax info of Property with PID saved to storage
@@ -201,50 +265,52 @@ chrome.windows.getCurrent((w) => {
       sendResponse(">>>complex search has been processed in eventpage: ");
     }
 
-    /// 小区(Complex)信息处理(查询,保存)
+    // /// 小区(Complex)信息处理(查询,保存)
 
-    switch (request.todo) {
-      case "processComplexInfo":
-        /// 处理小区名字, 查询标准小区名, 创建新的小区名, 更新小区名
-        processComplexInfo(request).then(sendResponse);
-        return true;
-      case "saveComplexInfo":
-        return true;
-    }
+    // switch (request.todo) {
+    //   case "processComplexInfo":
+    //     /// 处理小区名字, 查询标准小区名, 创建新的小区名, 更新小区名
+    //     processComplexInfo(request).then(sendResponse);
+    //     return true;
+    //   case "saveComplexInfo":
+    //     let mode = 1; /// 强制更新数据库记录
+    //     processComplexInfo(request, mode).then(sendResponse);
+    //     return true;
+    // }
 
-    if (request.todo == "X.searchComplexInfo") {
-      var complexID = request._id;
-      var requestFrom = request.from;
-      delete request.from;
-      var complexInfo = request;
+    // if (request.todo == "X.searchComplexInfo") {
+    //   var complexID = request._id;
+    //   var requestFrom = request.from;
+    //   delete request.from;
+    //   var complexInfo = request;
 
-      db.readComplex(complexInfo, function (cInfo) {
-        //console.log('>>>read the complex info from database:', complexInfo);
-        if (cInfo) {
-          if (cInfo.name.length > 0) {
-            cInfo.from += "-" + requestFrom;
-            cInfo.complexName = cInfo.name;
-          } else {
-            cInfo.from += "-" + requestFrom;
-            cInfo.complexName = "::";
-          }
+    //   db.readComplex(complexInfo, function (cInfo) {
+    //     //console.log('>>>read the complex info from database:', complexInfo);
+    //     if (cInfo) {
+    //       if (cInfo.name.length > 0) {
+    //         cInfo.from += "-" + requestFrom;
+    //         cInfo.complexName = cInfo.name;
+    //       } else {
+    //         cInfo.from += "-" + requestFrom;
+    //         cInfo.complexName = "::";
+    //       }
 
-          chrome.storage.local.set(cInfo, function () {
-            console.log("complexInfo is: ", cInfo);
-          });
-        } else {
-          //error for complexInfo
-          console.log("Complex Name does not exist in Database");
-        }
-      });
-    }
+    //       chrome.storage.local.set(cInfo, function () {
+    //         console.log("complexInfo is: ", cInfo);
+    //       });
+    //     } else {
+    //       //error for complexInfo
+    //       console.log("Complex Name does not exist in Database");
+    //     }
+    //   });
+    // }
 
-    if (request.todo == "saveComplexInfo") {
-      var complexID = request._id;
-      if (request.complexName.trim().length > 0) {
-        db.writeComplex(request);
-      }
-    }
+    // if (request.todo == "saveComplexInfo") {
+    //   var complexID = request._id;
+    //   if (request.complexName.trim().length > 0) {
+    //     db.writeComplex(request);
+    //   }
+    // }
 
     if (request.todo == "searchExposure") {
       var requestFrom = request.from;
@@ -643,9 +709,9 @@ async function searchTaxFromRemoteDB(request) {
   let assessInfo = resultInfo.data; /// assessInfo 保存在data属性中
   console.log(`#${request.searchSequenceNo}`, assessInfo);
 
-  // assessInfo = await chrome.tabs.promise.sendMessage(tabs[0].id, {
-  //   todo: "getTaxSearchDetailsFromFrontService",
-  // });
+  /// 保存地税/评估数据
+  resultInfo = await saveTax(assessInfo, db);
+  console.log(`() Saved Tax/Assess to CouchDB: ${resultInfo}  ()`);
 
   let result = {
     msg: ">>> Tax Search Return From Front Service <<<",
@@ -655,25 +721,47 @@ async function searchTaxFromRemoteDB(request) {
   return result;
 }
 
-async function saveTax(request, db) {
+async function saveTax(assessInfo, db) {
   //console.log(">>>I got save tax info: ");
-  var assess = request.taxData;
-  assess._id = assess.PID + "-" + assess.taxYear;
+  assessInfo._id = assessInfo.PID + "-" + assessInfo.taxYear;
+  let request = {
+    PID: assessInfo.PID,
+    taxYear: assessInfo.taxYear,
+    from: "eventPage_SaveTax",
+  };
   // db.writeAssess(assess);
   queryTaxAndAssess = new QueryTaxAndAssess(request, db);
   try {
-    let resp = await queryTaxAndAssess.setAssessInfoPromise(assess);
+    let resp = await queryTaxAndAssess.setAssessInfoPromise(assessInfo);
     console.log(resp);
+    return resp;
   } catch (err) {
     console.log(err);
+    return err;
   }
-  return assess;
+}
+
+async function saveFailedTaxSearch(request, db) {
+  //console.log(">>>I got save tax info: ");
+  let assessInfo = request.taxData;
+  assessInfo._id = assessInfo.PID + "-" + assessInfo.taxYear;
+  // db.writeAssess(assess);
+  queryTaxAndAssess = new QueryTaxAndAssess(request, db);
+  try {
+    let resp = await queryTaxAndAssess.setAssessInfoPromise(assessInfo);
+    console.log(resp);
+    return resp;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
 }
 
 ///////////////////////////////////////////////////
-async function processComplexInfo(complexInfo) {
+async function processComplexInfo(complexInfo, mode = 0) {
   /// 功能说明: 处理小区名
   /// 查询/更新/创建 标准的小区信息,
+  /// 可选模式参数mode: 0 default, 1 force update the complexInfo
   /// 返回带小区信息的信息包
   const cNoNames = ["TBA", "::", ""];
   delete complexInfo.from;
@@ -706,21 +794,43 @@ async function processComplexInfo(complexInfo) {
       case !cNoNames.includes(cName) && !cNoNames.includes(cNameInDB):
         /// 待查为空, 已查非空 - 直接返回
         /// 待查非空, 已查非空 - 直接返回
-        resInfo = {
-          msg: `<> Found Complex Name: ${cStandardInfo.complexName} <>`,
-          data: cStandardInfo,
-          status: "OK",
-        };
+        if (mode === 0) {
+          /// 模式0, 返回数据库记录
+          resInfo = {
+            msg: `<> Found Complex Name: ${cStandardInfo.complexName} <>`,
+            data: cStandardInfo,
+            status: "OK",
+          };
+        }
+        if (mode === 1) {
+          /// 模式0, 强制更新数据库记录
+          resQueryDB = await db.updateComplexPromise(complexInfo);
+          resInfo = {
+            msg: `<> Force Updated Complex Name: ${complexInfo.complexName} <>`,
+            data: complexInfo,
+            status: "OK",
+          };
+        }
+        /// 返回查询结果数据包
         return Promise.resolve(resInfo);
     }
   } catch (err) {
     /// 数据库没有记录, 创建新记录
-    resQueryDB = await db.createComplexPromise(complexInfo);
-    resInfo = {
-      msg: `<> Created Complex Record: ${complexInfo.complexName} <>`,
-      data: complexInfo,
-      status: "OK",
-    };
-    return Promise.resolve(resInfo);
+    try {
+      resQueryDB = await db.createComplexPromise(complexInfo);
+      resInfo = {
+        msg: `<> Created Complex Record: ${complexInfo.complexName} <>`,
+        data: complexInfo,
+        status: "OK",
+      };
+      return Promise.resolve(resInfo);
+    } catch (err) {
+      resInfo = {
+        msg: err.message,
+        data: null,
+        status: err.status,
+      };
+      return Promise.reject(resInfo);
+    }
   }
 }

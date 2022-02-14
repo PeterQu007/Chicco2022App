@@ -136,6 +136,7 @@ function waitTaxDetails(response) {
         data: event.data,
         status: "OK",
       };
+      /// 向后台申请程序, 返还数据包
       response(assessInfo);
       /// 查询完成后, 移除事件句柄
       window.removeEventListener("message", eventHandler);
@@ -162,18 +163,22 @@ function processFailedSearch(msg, response) {
     data: assess,
     status: "failed",
   };
-  chrome.storage.local.set(assess, function () {
-    console.log("Tax Search Failed...", assess);
-  });
+  // chrome.storage.local.set(assess, function () {
+  //   console.log("Tax Search Failed...", assess);
+  // });
   /// 向后台请求方, 发出保存数据的指令
-  chrome.runtime.sendMessage(
-    {
-      todo: "saveTax",
-      taxData: assess,
-    },
-    function (response) {
-      console.log("tax Data has been save to the database!", response);
-    }
-  );
+  // chrome.runtime.sendMessage(
+  //   {
+  //     todo: "saveFailedTaxSearch",
+  //     taxData: assess,
+  //     PID: assess.PID,
+  //     taxYear: assess.taxYear,
+  //     from: "[] taxSearchCriteria.js []",
+  //   },
+  //   function (response) {
+  //     console.log("tax Data has been save to the database!", response);
+  //   }
+  // );
+  /// 返回查询数据包
   response(assessInfo);
 }

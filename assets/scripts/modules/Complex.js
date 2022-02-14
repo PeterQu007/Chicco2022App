@@ -26,7 +26,7 @@ class Complex {
       ajax_url = DATA_COMPLEX_API_URL_LIVE;
     }
 
-    ajax_url = $fx.getPIDAjaxUrl() + "dataAssessInfo.php";
+    ajax_url = $fx.getPIDAjaxUrl() + "dataComplexInfo.php";
 
     $.ajax({
       url: ajax_url,

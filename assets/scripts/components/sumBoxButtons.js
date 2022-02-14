@@ -706,18 +706,20 @@ class SumBoxButtons extends React.Component {
   }
 
   onSaveComplexInfo() {
-    ////MANUALLY SAVE OR UPDATE COMPLEX NAME TO THE DATABASE
-    ////RECORD NO HAS TO BE LOOK UP THE CHECKED ONE IN THE TABLE
+    /// 功能说明: 保存或者更新单个小区名
+    /// MANUALLY SAVE OR UPDATE COMPLEX NAME TO THE DATABASE
+    /// RECORD NO HAS TO BE LOOK UP THE CHECKED ONE IN THE TABLE
+    console.log("() Module: sumBoxButtons.js ()");
     const { tabTitle } = this.props;
     //var self = this;
     var cols = $fx.setCols(tabTitle);
-    var complexName = $fx.normalizeComplexName(this.state.complexName.val()); ////NORMALIZED THE COMPLEX NAME
+    var complexName = $fx.normalizeComplexName(this.state.complexName.val()); ///NORMALIZED THE COMPLEX NAME
 
     if (complexName.length == 0) {
       console.warn("NOT INPUT A VALID COMPLEX NAME");
       return;
     }
-    ////SEARCH CHECKED RECORD NO
+    ///SEARCH CHECKED RECORD NO
     var recordNo = 0;
     var recordRow_i = null;
     var strataPlan_i = "";
@@ -735,11 +737,12 @@ class SumBoxButtons extends React.Component {
     }
     var recordRows = $(htmlTable).children().find("tr");
 
+    /// 定位需要更新小区名的记录
     for (var i = 1; i < recordRows.length; i++) {
-      recordRow_i = $(recordRows[i]); ////LOOP ALL THE ROWS IN THE TABLE
+      recordRow_i = $(recordRows[i]); ///LOOP ALL THE ROWS IN THE TABLE
       cells_i = recordRow_i.children();
       recordNo_i = cells_i[cols.RecordNo];
-      recordCheckbox_i = $(cells_i[1]).children('input[type="checkbox"]'); ////HARDWIRED THE COL NO 1 TO THE CHECKBOX COLUMN
+      recordCheckbox_i = $(cells_i[1]).children('input[type="checkbox"]'); ///HARDWIRED THE COL NO 1 TO THE CHECKBOX COLUMN
       if ($(recordCheckbox_i).prop("checked") == true) {
         recordNo = recordNo_i.textContent;
         break;
@@ -753,29 +756,30 @@ class SumBoxButtons extends React.Component {
       recordNo = ((recordNo - 1) % 250) + 1;
     }
 
-    ////UPDATE THE COMPLEX NAME IN THE SPREAD SHEET
-    var recordRow = $(recordRows[recordNo]); ////FETCH THE SELECTED ROW AND ITS CELLS
+    ///UPDATE THE COMPLEX NAME IN THE SPREAD SHEET
+    var recordRow = $(recordRows[recordNo]); ///FETCH THE SELECTED ROW AND ITS CELLS
     var cells = recordRow.children();
 
     var strataPlan = cells[cols.StrataPlan].textContent;
     var streetAddress = cells[cols.StreetAddress].textContent;
 
+    /// 更新搜索结果数据表格中所有同一小区的挂牌记录
     for (var i = 1; i < recordRows.length; i++) {
-      recordRow_i = $(recordRows[i]); ////LOOP ALL THE ROWS IN THE TABLE
+      recordRow_i = $(recordRows[i]); ///LOOP ALL THE ROWS IN THE TABLE
       cells_i = recordRow_i.children();
       recordNo_i = cells_i[cols.RecordNo];
-      recordCheckbox_i = $(cells_i[2]).children().find('input[type="checkbox'); ////HARDWIRED THE COL NO 2 TO THE CHECKBOX COLUMN
+      recordCheckbox_i = $(cells_i[2]).children().find('input[type="checkbox'); ///HARDWIRED THE COL NO 2 TO THE CHECKBOX COLUMN
       complexCell_i = cells_i[cols.ComplexName];
       strataPlan_i = cells_i[cols.StrataPlan].textContent;
       streetAddress_i = cells_i[cols.StreetAddress].textContent;
       if (strataPlan == strataPlan_i && streetAddress == streetAddress_i) {
-        complexCell_i.textContent = complexName;
+        complexCell_i.textContent = complexName; /// 更新数据表里面的小区名
       }
     }
 
-    ////SAVE THE COMPLEX.INFO INTO THE DATABASE
+    ///SAVE THE COMPLEX.INFO INTO THE DATABASE
     if (complexName.length > 0) {
-      ////PREPARE THE FIELDS FOR THE COMPLEX.INFO OBJECT
+      ///PREPARE THE FIELDS FOR THE COMPLEX.INFO OBJECT
       var subArea = cells[cols.SubArea].textContent;
       var neighborhood = cells[cols.Neighborhood].textContent;
       var postcode = cells[cols.Postcode].textContent;
@@ -787,7 +791,7 @@ class SumBoxButtons extends React.Component {
       var totalUnits = 0;
       var devUnits = 0;
 
-      ////ASSEMBLE THE COMPLEX INFO OBJECT
+      ///ASSEMBLE THE COMPLEX INFO OBJECT
       var complexInfo = {
         _id:
           strataPlan +
@@ -813,10 +817,12 @@ class SumBoxButtons extends React.Component {
         from: "uiSummaryTable",
       };
 
-      ////SEND THE COMPLEX NAME INTO THE DATABASE BY CALL ADD.COMPLEX.INFO
-      chrome.runtime.sendMessage(complexInfo, function (response) {});
+      ///SEND THE COMPLEX NAME INTO THE DATABASE BY CALL ADD.COMPLEX.INFO
+      chrome.runtime.sendMessage(complexInfo, function (response) {
+        console.log(response);
+      });
 
-      ////FEEDBACK THE INPUT AREA WITH ADDED STAR SIGN
+      ///FEEDBACK THE INPUT AREA WITH ADDED STAR SIGN
       this.state.complexName.val(complexName + "*");
     }
   }
