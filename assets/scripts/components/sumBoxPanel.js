@@ -1,13 +1,35 @@
 "use strict";
 
+(async function () {
+  /// 设定调试输出模式
+  let debugSettingInfo = await chrome.runtime.promise.sendMessage({
+    debugID: "debug_sumbox_panel",
+    from: "sumBoxPanel.js",
+    todo: "readDebugSetting",
+  });
+  let debugSetting = debugSettingInfo.data.value;
+  console.currentPage = {
+    log: debugSetting ? console.log : () => {},
+    logAlways: console.log,
+    logDebug: (tag, pageName) => {
+      if (!debugSetting) {
+        console.log(`(${tag} DISABLED: ) ${pageName} ()`);
+      }
+    },
+    warn: debugSetting ? console.warn : () => {},
+  };
+
+  console.currentPage.logDebug("Debug", "sumBoxPanel.js");
+})();
+
 class SumBoxPanel extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log(props);
+    console.currentPage.log(props);
   }
   // handleClick(e) {
-  //   console.log("test click", e);
+  //   console.currentPage.log("test click", e);
   //   //return false;
   // }
   componentDidUpdate(oldProps) {
@@ -15,7 +37,7 @@ class SumBoxPanel extends React.Component {
     // if(oldProps.field !== newProps.field) {
     //   this.setState({ ...something based on newProps.field... })
     // }
-    console.warn("REACT UPDATED");
+    console.currentPage.warn("REACT UPDATED");
   }
   render() {
     const { panel } = this.props;

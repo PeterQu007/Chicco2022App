@@ -72,80 +72,28 @@ chrome.windows.getCurrent((w) => {
     }
   );
 
-  /// 添加地税/评估数据服务事件句柄
+  /// 模块#0: 添加一般事件处理句柄
   chrome.runtime.onMessage.addListener(function (
     request,
     sender,
     sendResponse
   ) {
-    let taxCommands = [
-      "taxSearch",
-      "searchTaxFromCouchDB",
-      "searchTaxFromRemoteDB",
-      "saveFailedTaxSearch",
+    let generalRequests = [
+      "warningMessage",
+      "logoutMessage",
+      "switchTab",
+      "getTabTitle",
+      "addLock",
+      "hideQuickSearch",
+      "updateTopLevelTabMenuItems",
+      "readCurTabID",
+      "syncTabToContent",
+      "saveTableInfo",
+      "readMLSTableInfo",
     ];
-    if (taxCommands.includes(request.todo)) {
-      console.log(
-        `(1.tax) onMessage from: ${$fx.getTabID3(sender.url)} | ${
-          request.from
-        }; todo: ${request.todo} () `
-      );
-    }
-    switch (request.todo) {
-      // CouchDB数据库 - 处理查询和保存地税/评估数据程序模块
-      case "taxSearch":
-        searchTax(request, db).then(sendResponse);
-        return true;
-      case "searchTaxFromCouchDB":
-        searchTaxFromCouchDB(request, db).then(sendResponse);
-        return true;
-      case "searchTaxFromRemoteDB":
-        searchTaxFromRemoteDB(request).then(sendResponse);
-        return true;
-      case "saveFailedTaxSearch":
-        saveFailedTaxSearch(request, db).then(sendResponse);
-        return true;
-    }
-  });
+    if (!generalRequests.includes(request.todo)) return;
 
-  /// 添加小区名字处理服务事件句柄
-  chrome.runtime.onMessage.addListener(function (
-    request,
-    sender,
-    sendResponse
-  ) {
-    let complexCommands = ["processComplexInfo", "saveComplexInfo"];
-    if (complexCommands.includes(request.todo)) {
-      console.log(
-        `(2.complex) onMessage from: ${$fx.getTabID3(sender.url)} | ${
-          request.from
-        }; todo: ${request.todo} () `
-      );
-    }
-
-    /// 小区(Complex)信息处理(查询,保存)
-    switch (request.todo) {
-      case "processComplexInfo":
-        /// 处理小区名字, 查询标准小区名, 创建新的小区名, 更新小区名
-        processComplexInfo(request).then(sendResponse);
-        return true;
-      case "saveComplexInfo":
-        let mode = 1; /// 强制更新数据库记录
-        processComplexInfo(request, mode).then(sendResponse);
-        return true;
-    }
-  });
-
-  /// 添加其他后台服务句柄
-  chrome.runtime.onMessage.addListener(function (
-    request,
-    sender,
-    sendResponse
-  ) {
-    console.log(
-      `() onMessage.eventPage got a message from: ${request.from}; todo: ${request.todo} () `
-    );
-
+    console.eventpage.logRequest(request, sender, "0.General");
     //message from Warning iframe
     if (request.todo == "warningMessage") {
       //console.log("I got the warning message!");
@@ -203,22 +151,258 @@ chrome.windows.getCurrent((w) => {
       sendResponse("switchTab done!!!");
     }
 
-    /// 地税查询模块
-    // switch (request.todo) {
-    //   // CouchDB数据库 - 处理查询和保存地税/评估数据程序模块
-    //   case "taxSearch":
-    //     searchTax(request, db).then(sendResponse);
-    //     return true;
-    //   case "searchTaxFromCouchDB":
-    //     searchTaxFromCouchDB(request, db).then(sendResponse);
-    //     return true;
-    //   case "searchTaxFromRemoteDB":
-    //     searchTaxFromRemoteDB(request).then(sendResponse);
-    //     return true;
-    //   case "saveFailedTaxSearch":
-    //     saveFailedTaxSearch(request, db).then(sendResponse);
-    //     return true;
-    // }
+    if (request.todo == "getTabTitle") {
+      console.log("Command: ", request.todo, request.from);
+      let result = null;
+      console.info("Chrome Tab ID is: ", chromeTabID);
+      chrome.tabs.query(
+        {
+          active: true,
+          currentWindow: true,
+        },
+        function (tabs) {
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            {
+              todo: "getTabTitle",
+              tabID: request.tabID,
+            },
+            function (response) {
+              result = response;
+              console.log("getTabTitle response:", response);
+              chrome.storage.local.set({
+                getTabID: result.tabID,
+                getTabTitle: result.tabTitle,
+                todo: "getTabTitle" + Math.random().toFixed(8),
+                from: "EventPage.getTabTitle",
+              });
+              sendResponse(response);
+            }
+          );
+        }
+      );
+      //check(result); //wait for 1 sec, stop eventPage hit the exit point, send out null response
+    }
+
+    if (request.todo == "addLock") {
+      //get command from sub content script to add lock to the sub content panel
+      console.log("Command: ", request.todo, request.from, request.tabID);
+      let result = null;
+      console.info("Chrome Tab ID is: ", chromeTabID);
+
+      chrome.windows.getCurrent((w) => {
+        chrome.tabs.query({ active: true, windowId: w.id }, (tabs) => {
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            {
+              todo: "addLock",
+              tabID: request.tabID,
+            },
+            function (response) {
+              result = response;
+              console.eventpage.logResponse(response, sender, "0.AddLock");
+              sendResponse(response);
+            }
+          );
+        });
+      });
+    }
+    if (request.todo == "hideQuickSearch") {
+      console.log("New Command: showQuickSearch");
+      console.info("Chrome Tab ID is: ", chromeTabID);
+      chrome.tabs.query(
+        {
+          active: true,
+          currentWindow: true,
+        },
+        function (tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            todo: "hideQuickSearch",
+            tabID: request.tabID,
+          });
+        }
+      );
+    }
+
+    if (request.todo == "updateTopLevelTabMenuItems") {
+      console.log("I got Update Top Level Tab Menu Items Command!");
+      console.info("Chrome Tab ID is: ", chromeTabID);
+      chrome.tabs.query(
+        {
+          active: true,
+          currentWindow: true,
+        },
+        function (tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            todo: "updateTopLevelTabMenuItems",
+          });
+        }
+      );
+
+      sendResponse("Update Top Level Tab Menu Items Command sent out!");
+    }
+
+    if (request.todo == "readCurTabID") {
+      console.log("New Command: readCurTabID");
+      console.info("Chrome Tab ID is: ", chromeTabID);
+      chrome.tabs.query(
+        {
+          active: true,
+          currentWindow: true,
+        },
+        function (tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            todo: "readCurTabID",
+          });
+        }
+      );
+
+      sendResponse("readCurTabID Command sent out!");
+    }
+
+    if (request.todo == "syncTabToContent") {
+      console.log("New Command: syncTabToContent");
+      console.info("Chrome Tab ID is: ", chromeTabID);
+      chrome.tabs.query(
+        {
+          active: true,
+          currentWindow: true,
+        },
+        function (tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            todo: "syncTabToContent",
+          });
+        }
+      );
+    }
+
+    if (request.todo == "saveTableInfo") {
+      mlsTable = JSON.parse(request.table);
+      sendResponse("Table Saved!");
+    }
+
+    if (request.todo == "readMLSTableInfo") {
+      // sendResponse(mlsTable);
+      let mlsNo = request.mlsNo;
+      let listingInfo = [];
+      // search tax value
+      mlsTable.forEach((row) => {
+        if (row["ML #"] == mlsNo) {
+          listingInfo = row;
+        }
+      });
+      sendResponse(listingInfo);
+    }
+    return true;
+  });
+
+  /// 模块#1: 添加地税/评估数据服务事件句柄
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse
+  ) {
+    let taxRequests = [
+      "taxSearch",
+      "searchTaxFromCouchDB",
+      "searchTaxFromRemoteDB",
+      "saveFailedTaxSearch",
+    ];
+    if (!taxRequests.includes(request.todo)) return;
+
+    console.eventpage.logRequest(request, sender, "1.Tax");
+    switch (request.todo) {
+      // CouchDB数据库 - 处理查询和保存地税/评估数据程序模块
+      case "taxSearch":
+        searchTax(request, db).then(sendResponse);
+        return true;
+      case "searchTaxFromCouchDB":
+        searchTaxFromCouchDB(request, db).then(sendResponse);
+        return true;
+      case "searchTaxFromRemoteDB":
+        searchTaxFromRemoteDB(request).then(sendResponse);
+        return true;
+      case "saveFailedTaxSearch":
+        saveFailedTaxSearch(request, db).then(sendResponse);
+        return true;
+    }
+  });
+
+  /// 模块#2: 添加小区名字处理服务事件句柄
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse
+  ) {
+    let complexRequests = [
+      "processComplexInfo",
+      "saveComplexInfo",
+      "searchComplexInfo",
+    ];
+    if (!complexRequests.includes(request.todo)) return;
+    console.eventpage.logRequest(request, sender, "2.Complex");
+
+    /// 小区(Complex)信息处理(查询,保存)
+    switch (request.todo) {
+      case "processComplexInfo":
+        /// 处理小区名字, 查询标准小区名, 创建新的小区名, 更新小区名
+        processComplexInfo(request).then(sendResponse);
+        return true;
+      case "saveComplexInfo":
+        let mode = 1; /// 强制更新数据库记录
+        processComplexInfo(request, mode).then(sendResponse);
+        return true;
+      case "searchComplexInfo":
+        searchComplexInfo(request.complexID).then(sendResponse);
+        return true;
+    }
+  });
+
+  /// 模块#3: 读取调试设定参数
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse
+  ) {
+    let debugRequests = [
+      "readDebugSetting",
+      "saveDebugSetting",
+      "loadDebugSettings",
+    ];
+    if (!debugRequests.includes(request.todo)) return;
+    console.eventpage.logRequest(request, sender, "3.Debug");
+
+    switch (request.todo) {
+      case "readDebugSetting":
+        readDebugSetting(request.debugID).then(sendResponse);
+        return true;
+      case "loadDebugSettings":
+        loadDebugSettings(/**load all settings */).then(sendResponse);
+        return true;
+    }
+  });
+
+  ///  模块#x: 添加其他后台数据服务句柄
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse
+  ) {
+    let miscRequests = [
+      "searchStrataPlanSummary",
+      "searchExposure",
+      "saveExposure",
+      "searchListing",
+      "saveListing",
+      "searchShowing",
+      "saveShowing",
+      "saveStrataPlanSummary",
+      "saveSubjectInfo",
+      "saveCMAInfo",
+      "UpdateCommunityInfoToWP",
+    ];
+    if (!miscRequests.includes(request.todo)) return;
+    console.eventpage.logRequest(request, sender, "x.Misc");
 
     if (request.todo == "searchStrataPlanSummary") {
       //get request to search tax info of Property with PID saved to storage
@@ -264,53 +448,6 @@ chrome.windows.getCurrent((w) => {
       );
       sendResponse(">>>complex search has been processed in eventpage: ");
     }
-
-    // /// 小区(Complex)信息处理(查询,保存)
-
-    // switch (request.todo) {
-    //   case "processComplexInfo":
-    //     /// 处理小区名字, 查询标准小区名, 创建新的小区名, 更新小区名
-    //     processComplexInfo(request).then(sendResponse);
-    //     return true;
-    //   case "saveComplexInfo":
-    //     let mode = 1; /// 强制更新数据库记录
-    //     processComplexInfo(request, mode).then(sendResponse);
-    //     return true;
-    // }
-
-    // if (request.todo == "X.searchComplexInfo") {
-    //   var complexID = request._id;
-    //   var requestFrom = request.from;
-    //   delete request.from;
-    //   var complexInfo = request;
-
-    //   db.readComplex(complexInfo, function (cInfo) {
-    //     //console.log('>>>read the complex info from database:', complexInfo);
-    //     if (cInfo) {
-    //       if (cInfo.name.length > 0) {
-    //         cInfo.from += "-" + requestFrom;
-    //         cInfo.complexName = cInfo.name;
-    //       } else {
-    //         cInfo.from += "-" + requestFrom;
-    //         cInfo.complexName = "::";
-    //       }
-
-    //       chrome.storage.local.set(cInfo, function () {
-    //         console.log("complexInfo is: ", cInfo);
-    //       });
-    //     } else {
-    //       //error for complexInfo
-    //       console.log("Complex Name does not exist in Database");
-    //     }
-    //   });
-    // }
-
-    // if (request.todo == "saveComplexInfo") {
-    //   var complexID = request._id;
-    //   if (request.complexName.trim().length > 0) {
-    //     db.writeComplex(request);
-    //   }
-    // }
 
     if (request.todo == "searchExposure") {
       var requestFrom = request.from;
@@ -423,136 +560,6 @@ chrome.windows.getCurrent((w) => {
       sendResponse(spSummary);
     }
 
-    if (request.todo == "updateTopLevelTabMenuItems") {
-      console.log("I got Update Top Level Tab Menu Items Command!");
-      console.info("Chrome Tab ID is: ", chromeTabID);
-      chrome.tabs.query(
-        {
-          active: true,
-          currentWindow: true,
-        },
-        function (tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            todo: "updateTopLevelTabMenuItems",
-          });
-        }
-      );
-
-      sendResponse("Update Top Level Tab Menu Items Command sent out!");
-    }
-
-    if (request.todo == "readCurTabID") {
-      console.log("New Command: readCurTabID");
-      console.info("Chrome Tab ID is: ", chromeTabID);
-      chrome.tabs.query(
-        {
-          active: true,
-          currentWindow: true,
-        },
-        function (tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            todo: "readCurTabID",
-          });
-        }
-      );
-
-      sendResponse("readCurTabID Command sent out!");
-    }
-
-    if (request.todo == "syncTabToContent") {
-      console.log("New Command: syncTabToContent");
-      console.info("Chrome Tab ID is: ", chromeTabID);
-      chrome.tabs.query(
-        {
-          active: true,
-          currentWindow: true,
-        },
-        function (tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            todo: "syncTabToContent",
-          });
-        }
-      );
-    }
-
-    if (request.todo == "hideQuickSearch") {
-      console.log("New Command: showQuickSearch");
-      console.info("Chrome Tab ID is: ", chromeTabID);
-      chrome.tabs.query(
-        {
-          active: true,
-          currentWindow: true,
-        },
-        function (tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            todo: "hideQuickSearch",
-            tabID: request.tabID,
-          });
-        }
-      );
-    }
-
-    if (request.todo == "getTabTitle") {
-      console.log("Command: ", request.todo, request.from);
-      let result = null;
-      console.info("Chrome Tab ID is: ", chromeTabID);
-      chrome.tabs.query(
-        {
-          active: true,
-          currentWindow: true,
-        },
-        function (tabs) {
-          chrome.tabs.sendMessage(
-            tabs[0].id,
-            {
-              todo: "getTabTitle",
-              tabID: request.tabID,
-            },
-            function (response) {
-              result = response;
-              console.log("getTabTitle response:", response);
-              chrome.storage.local.set({
-                getTabID: result.tabID,
-                getTabTitle: result.tabTitle,
-                todo: "getTabTitle" + Math.random().toFixed(8),
-                from: "EventPage.getTabTitle",
-              });
-              sendResponse(response);
-            }
-          );
-        }
-      );
-      //check(result); //wait for 1 sec, stop eventPage hit the exit point, send out null response
-    }
-
-    if (request.todo == "addLock") {
-      //get command from sub content script to add lock to the sub content panel
-      console.log("Command: ", request.todo, request.from, request.tabID);
-      let result = null;
-      console.info("Chrome Tab ID is: ", chromeTabID);
-
-      chrome.windows.getCurrent((w) => {
-        chrome.tabs.query({ active: true, windowId: w.id }, (tabs) => {
-          chrome.tabs.sendMessage(
-            tabs[0].id,
-            {
-              todo: "addLock",
-              tabID: request.tabID,
-            },
-            function (response) {
-              result = response;
-              console.log("addLock response:", response);
-              // chrome.storage.local.set(
-              // 	{getTabID:result.tabID,
-              // 	getTabTitle:result.tabTitle,
-              // 	todo: 'getTabTitle'+Math.random().toFixed(8),
-              // 	from: 'EventPage.getTabTitle'});
-              sendResponse(response);
-            }
-          );
-        });
-      });
-    }
     // "https://pidrealty.local/wp-content/themes/pidHomes-PhaseI/db/dbAddSubjectProperty.php"
     if (request.todo == "saveSubjectInfo") {
       var subjectInfo = request;
@@ -599,25 +606,7 @@ chrome.windows.getCurrent((w) => {
       });
     }
 
-    if (request.todo == "saveTableInfo") {
-      mlsTable = JSON.parse(request.table);
-      sendResponse("Table Saved!");
-    }
-
-    if (request.todo == "readMLSTableInfo") {
-      // sendResponse(mlsTable);
-      let mlsNo = request.mlsNo;
-      let listingInfo = [];
-      // search tax value
-      mlsTable.forEach((row) => {
-        if (row["ML #"] == mlsNo) {
-          listingInfo = row;
-        }
-      });
-      sendResponse(listingInfo);
-    }
-
-    // return true;
+    return true;
   });
 
   //End of Main Function
@@ -834,3 +823,82 @@ async function processComplexInfo(complexInfo, mode = 0) {
     }
   }
 }
+
+async function searchComplexInfo(complexID) {
+  let complexInfo = {
+    _id: complexID,
+  };
+  try {
+    let cStandardInfo = await db.readComplexPromise(complexInfo); // 读取数据库
+    return Promise.resolve(cStandardInfo);
+  } catch (err) {
+    let resInfo = {
+      msg: "<> Search Complex Info Error <>",
+      data: err,
+      status: err.status,
+    };
+    return Promise.reject(resInfo);
+  }
+}
+
+/////////////////////////////////////////////////////////
+async function readDebugSetting(debugID) {
+  /// 功能说明: 读取调试设定, 返回1 为启用调试信息输出, 返回0, 为禁用调试信息输出
+  /// debugID是每个功能模块的设定
+  let resInfo;
+  try {
+    let debugSetting = await db.readDebugSetting(debugID);
+    resInfo = {
+      msg: "<> Debug Setting Found <>",
+      data: debugSetting,
+      status: "OK",
+    };
+    return Promise.resolve(resInfo);
+  } catch (err) {
+    resInfo = {
+      msg: "<> Debug Setting Found <>",
+      data: debugSetting,
+      status: "OK",
+    };
+    return Promise.reject(resInfo);
+  }
+}
+
+async function loadDebugSettings() {
+  /// 功能说明: 读取所有的设定参数
+  let resInfo;
+  try {
+    let debugSettings = await db.loadDebugSettings();
+    resInfo = {
+      msg: "<> Loaded All Debug Settings <>",
+      data: debugSettings,
+      status: "OK",
+    };
+    return Promise.resolve(resInfo);
+  } catch (err) {
+    resInfo = {
+      msg: "<> Could Not Load All Settings <>",
+      data: err,
+      status: err.status,
+    };
+    return Promise.reject(resInfo);
+  }
+}
+
+////////////////////////////////////////////////////////
+console.eventpage = {
+  logRequest: (request, sender, tag) => {
+    console.log(
+      `(${tag}) Request: ${request.todo} | from: ${$fx.getTabID3(
+        sender.url
+      )} | ${request.from} () `
+    );
+  },
+  logResponse: (response, sender, tagToDo) => {
+    console.log(
+      `(${tagToDo}) Response: ${response} | from: ${$fx.getTabID3(
+        sender.url
+      )} () `
+    );
+  },
+};

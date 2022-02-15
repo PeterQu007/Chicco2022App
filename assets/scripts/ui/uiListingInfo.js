@@ -62,6 +62,7 @@ class UIListingInfo {
     this.valueChangePercent = $('<div id="valueChangePercent"></div>');
     this.oldTimerLotValuePerSF = $('<div id="oldTimerLotValuePerSF"></div>');
     this.marketValuePerSF = $('<div id="marketValuePerSF"></div>');
+    this.currentTaxAssessYear = $('<div id="currentTaxAssessYear"></div>');
     //divs for remarks:
     this.realtorRemarks = $('<div id="realtorRemarks"></div>');
     this.publicRemarks = $('<div id="publicRemarks"></div>');
@@ -145,6 +146,7 @@ class UIListingInfo {
     uiDiv.append(this.valueChange);
     uiDiv.append(this.oldTimerLotValuePerSF);
     uiDiv.append(this.marketValuePerSF);
+    uiDiv.append(this.currentTaxAssessYear);
     //add remarks
     uiDiv.append($("<hr/>"));
     uiDiv.append(this.listingAgentSMS);

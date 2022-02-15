@@ -8,20 +8,28 @@
 const divContainerID = "divHtmlReport";
 var curTabID = null;
 console.log("Tax Details Tab1_1_2");
-/// 当前页面转到保存的搜索清单tab3
-// let tabSavedSearches = top.document.querySelectorAll("a[href='#tab3']");
-// tabSavedSearches[0].click();
 
-/// 添加通讯句柄
-// window.addEventListener("message", (event) => {
-//   if (
-//     event.origin.indexOf(
-//       "https://bcres.paragonrels.com/ParagonLS/Search/Tax.mvc?DBid=1&countyID=1&searchID=tab1_1"
-//     )
-//   ) {
-//     event.source.postMessage(taxDetails.assessInfo, event.origin);
-//   }
-// });
+(async function () {
+  /// 设定调试输出模式
+  let debugSettingInfo = await chrome.runtime.promise.sendMessage({
+    debugID: "debug_tax_search_details", /// 保存在DouchDB debugsettings表格中
+    from: "TaxSearchDetails.js",
+    todo: "readDebugSetting",
+  });
+  let debugSetting = debugSettingInfo.data.value;
+  console.currentPage = {
+    log: debugSetting ? console.log : () => {},
+    logAlways: console.log,
+    logDebug: (tag, pageName) => {
+      if (!debugSetting) {
+        console.log(`(${tag} DISABLED: ) ${pageName} ()`);
+      }
+    },
+    warn: debugSetting ? console.warn : () => {},
+  };
+
+  console.currentPage.logDebug("Debug", "TaxSearchDetails.js");
+})();
 
 let taxDetails = {
   /// 属性

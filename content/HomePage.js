@@ -17,18 +17,38 @@
   };
 })(jQuery);
 
+async function setDebugMode() {
+  /// 设定调试输出模式
+  let debugSettingInfo = await chrome.runtime.promise.sendMessage({
+    debugID: "debug_home_page", /// 保存在DouchDB debugsettings表格中
+    from: "HomePage.js",
+    todo: "readDebugSetting",
+  });
+  let debugSetting = debugSettingInfo.data.value;
+  console.currentPage = {
+    log: debugSetting ? console.log : () => {},
+    logAlways: console.log,
+    logDebug: (tag, pageName) => {
+      if (!debugSetting) {
+        console.log(`(${tag} DISABLED: ) ${pageName} ()`);
+      }
+    },
+    warn: debugSetting ? console.warn : () => {},
+  };
+
+  console.currentPage.logDebug("Debug", "HomePage.js");
+}
+
+/// 程序入口 Start point
+$(function () {
+  setDebugMode().then(() => {
+    DefaultPage.init();
+  });
+});
+
+/// 程序模块
 let DefaultPage = {
   init: function () {
-    // Define Debug
-
-    var DEBUG = false;
-    if (!DEBUG) {
-      if (!window.console) window.console = {};
-      var methods = ["log", "debug", "warn", "info"];
-      for (var i = 0; i < methods.length; i++) {
-        console[methods[i]] = function () {};
-      }
-    }
     // Open frequently used tabs:
     this.mainMenu.openTaxSearch();
     this.mainMenu.openListingCarts();
@@ -41,7 +61,7 @@ let DefaultPage = {
     this.onChanged();
     this.post();
     chrome.storage.local.get("keywords", (results) => {
-      console.log(results.keywords);
+      console.currentPage.log(results.keywords);
       // this.powerSearch.text(results.keywords);
       this.powerSearch.val(results.keywords);
     });
@@ -67,7 +87,7 @@ let DefaultPage = {
           // Warning Form is a special page, the buttons are in the div,
           // the iframe is separate with the buttons
           // this message sent from mls-warning.js
-          //console.log('Main Home ignore warning message!', $('#OK'));
+          //console.currentPage.log('Main Home ignore warning message!', $('#OK'));
           var countTimer = setInterval(checkCount, 100);
 
           function checkCount() {
@@ -75,7 +95,7 @@ let DefaultPage = {
             if (document.querySelector("#OK")) {
               clearInterval(countTimer);
               let btnOK = $("#OK");
-              //console.log('OK', btnOK);
+              //console.currentPage.log('OK', btnOK);
               btnOK.click();
             }
           }
@@ -84,8 +104,8 @@ let DefaultPage = {
         // Logout MLS Windows shows an annoying confirm box, pass it
         // The message sent from logout iframe , the buttons are inside the iframe
         if (request.todo == "logoutMLS") {
-          //console.log('Main Home got logout message!');
-          //console.log($('#confirm'));
+          //console.currentPage.log('Main Home got logout message!');
+          //console.currentPage.log($('#confirm'));
           var countTimer = setInterval(checkCount, 100);
 
           function checkCount() {
@@ -93,7 +113,7 @@ let DefaultPage = {
             if (document.querySelector("#confirm")) {
               clearInterval(countTimer);
               let btnYes = $("#confirm");
-              //console.log('confirm', btnYes);
+              //console.currentPage.log('confirm', btnYes);
               btnYes.click();
             }
           }
@@ -103,7 +123,10 @@ let DefaultPage = {
         if (request.todo == "updateTopLevelTabMenuItems") {
           // update tabs
           self.tabs = $("ul#tab-bg li");
-          console.log("default home page update top level tabs: ", tabs);
+          console.currentPage.log(
+            "default home page update top level tabs: ",
+            tabs
+          );
           self.curTabLink = $(
             "ul#tab-bg li.ui-tabs-selected.ui-state-active a"
           );
@@ -117,19 +140,22 @@ let DefaultPage = {
         if (request.todo == "readCurTabID") {
           // read cur tabID
           self.tabs = $("ul#tab-bg li");
-          console.log("default home page read top level tabs: ", self.tabs);
+          console.currentPage.log(
+            "default home page read top level tabs: ",
+            self.tabs
+          );
           self.curTabLink = $(
             "ul#tab-bg li.ui-tabs-selected.ui-state-active a"
           );
           self.curTabID = self.curTabLink.attr("href");
-          console.log("current Tab ID is: ", self.curTabID);
+          console.currentPage.log("current Tab ID is: ", self.curTabID);
           // save the curTabID
           chrome.storage.local.set(
             {
               curTabID: self.curTabID,
             },
             function () {
-              console.log("curTabID has been save to storage.");
+              console.currentPage.log("curTabID has been save to storage.");
             }
           );
         }
@@ -161,7 +187,11 @@ let DefaultPage = {
           console.group("getTabTitle", request.tabID);
           self.mainNavBar.mainNavItems.forEach(function (navItem) {
             if (navItem.ID == request.tabID) {
-              console.log("find tabTitle:", navItem.ID, navItem.Title);
+              console.currentPage.log(
+                "find tabTitle:",
+                navItem.ID,
+                navItem.Title
+              );
               sendResponse({
                 tabID: navItem.ID,
                 tabTitle: navItem.Title,
@@ -173,15 +203,19 @@ let DefaultPage = {
 
         //get TabTitle by TabID
         if (request.todo == "addLock") {
-          console.log("addLock", request.tabID);
+          console.currentPage.log("addLock", request.tabID);
           if (request.tabID != "#") {
             self.mainNavBar.update();
             self.mainNavBar.addLock(request.tabID);
-            console.log("addLock Succeed");
+            console.currentPage.log("addLock Succeed");
+            sendResponse("[.HomePage] addLock Succeed []");
           } else {
-            console.log("Cannot addLock");
+            console.currentPage.log("Cannot addLock");
+            sendResponse("[.HomePage] addLock Failed []");
           }
         }
+
+        return true;
       });
     })(this);
   },
@@ -196,7 +230,10 @@ let DefaultPage = {
         "todo" in changes &&
         changes.todo.newValue.indexOf("hideQuickSearch") > -1
       ) {
-        console.log("onTabStatusUpdate.command::", changes.todo.newValue);
+        console.currentPage.log(
+          "onTabStatusUpdate.command::",
+          changes.todo.newValue
+        );
         self.mainNavBar.topTabInfos.forEach(function (tabInfo) {
           if (tabInfo.tabTitle.trim() == "Quick Search") {
             tabInfo.DeactivateThisTab();
@@ -210,16 +247,16 @@ let DefaultPage = {
     var title = this.mainNavBar.mainNavItems[1].Title;
     var id = this.mainNavBar.mainNavItems[1].tabID;
     var array1 = [1, 2, 3, 4, 5, 6];
-    console.log({
+    console.currentPage.log({
       postTitle: title,
       postID: id,
     });
-    console.log(_);
+    console.currentPage.log(_);
     var subArray = _.max(array1);
-    console.log(subArray);
+    console.currentPage.log(subArray);
 
     // $.post('http://localhost/ChromeX/MLSHelper/app/test.php', {postTitle: title, postID: id}, function(data){
-    //     console.log(data);
+    //     console.currentPage.log(data);
     // })
 
     // http://pidrealty.local/wp-content/themes/realhomes-child/db/data.php
@@ -228,7 +265,7 @@ let DefaultPage = {
     //   "http://pidrealty.local/wp-content/themes/realhomes-child/db/data.php",
     //   { postTitle: title, postID: id },
     //   function(data) {
-    //     console.log(data);
+    //     console.currentPage.log(data);
     //   }
     // );
 
@@ -243,7 +280,7 @@ let DefaultPage = {
         postID: id,
       },
       success: function (res) {
-        console.log(res);
+        console.currentPage.log(res);
         $('input[name="textbox"]').val(
           JSON.stringify(res) + ":: connect to MySQL successfully!"
         );
@@ -251,8 +288,3 @@ let DefaultPage = {
     });
   },
 };
-
-// Start point
-$(function () {
-  DefaultPage.init();
-});

@@ -1,9 +1,40 @@
-//Targe Tab3//4/5_1_2 ML Default Spreadsheet View
+/***
+ * Targe Tab3//4/5_1_2 ML Default Spreadsheet View
+ * https://bcres.paragonrels.com/ParagonLS/Search/Property.mvc/Index/2/?savedSearchID=1781753&searchID=tab3_1
+ */
 
-//https://bcres.paragonrels.com/ParagonLS/Search/Property.mvc/Index/2/?savedSearchID=1781753&searchID=tab3_1
 window.g_urlCountAction = "/ParagonLS/Search/Property.mvc/Count/0";
 
-(function (elementExample, Object, window) {
+async function setDebugMode() {
+  /// 设定调试输出模式
+  let debugSettingInfo = await chrome.runtime.promise.sendMessage({
+    debugID: "debug_bypass_listing_Search_criteria",
+    from: "BypassListingSearchCriteria.js",
+    todo: "readDebugSetting",
+  });
+  let debugSetting = debugSettingInfo.data.value;
+  window.console.currentPage = {
+    log: debugSetting ? console.log : () => {},
+    logAlways: console.log,
+    logDebug: (tag, pageName) => {
+      if (!debugSetting) {
+        console.log(`(${tag} DISABLED: ) ${pageName} ()`);
+      }
+    },
+  };
+
+  console.currentPage.logDebug("Debug", "BypassListingSearchCriteria.js");
+}
+
+$(async function () {
+  /// 程序入口
+  await setDebugMode();
+
+  setWrapper(document.firstElementChild, Object, window);
+  searchCriteria();
+});
+
+function setWrapper(elementExample, Object, window) {
   function createIDLSetWrapper(key, nativeSet, nativeGet) {
     return function (newValue) {
       var oldValue = this.getAttribute(key);
@@ -16,6 +47,8 @@ window.g_urlCountAction = "/ParagonLS/Search/Property.mvc/Count/0";
     };
   }
 
+  /// 设定调试模式
+  await setDebugMode();
   var ownProps = Object.getOwnPropertyNames(window);
   for (var i = 0, len = ownProps.length | 0, key; i < len; i = (i + 1) | 0) {
     key = ownProps[i];
@@ -29,9 +62,10 @@ window.g_urlCountAction = "/ParagonLS/Search/Property.mvc/Count/0";
         var oldDescriptors = Object.getOwnPropertyDescriptors(
           window[key].prototype
         );
+
         var keys = Object.keys(oldDescriptors);
         var newDescriptors = {};
-        console.log(keys);
+        console.currentPage.log(keys);
 
         for (
           var i = 0, len = keys.length | 0, prop, description;
@@ -58,10 +92,10 @@ window.g_urlCountAction = "/ParagonLS/Search/Property.mvc/Count/0";
         Object.defineProperties(window[key].prototype, newDescriptors);
       })();
   }
-})(document.firstElementChild, Object, window);
+}
 
-$(function () {
-  //console.log("Search Bypass Criteria iFrame");
+function searchCriteria() {
+  //console.currentPage.log("Search Bypass Criteria iFrame");
 
   var btnSearch = $("#Search");
   var btnCount = $("#Count");
@@ -125,7 +159,7 @@ $(function () {
   }
   // keyword.val(powerSearchString);
   $("#mls_helper_save_criteria").click((e) => {
-    console.log("clicked");
+    console.currentPage.log("clicked");
     let criteriaTable = $("table.f-cs-items")[0];
     let criteriaRows = criteriaTable.querySelectorAll("tr");
     let criteriaRules = [];
@@ -158,16 +192,6 @@ $(function () {
     let urlLocation = urlLocationOptionLocal.prop("checked");
     let ajax_url = "";
 
-    if (urlLocation) {
-      // ajax_url =
-      //   "http://localhost/pidrealty4/wp-content/themes/Realhomes-child-3/db/dbAddCMACriteria.php";
-      ajax_url =
-        "https://pidrealty4.local/wp-content/themes/Realhomes-child-3/db/dbAddCMACriteria.php";
-    } else {
-      ajax_url =
-        "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/dbAddCMACriteria.php";
-    }
-
     ajax_url = $fx.getPIDAjaxUrl() + "dbAddCMACriteria.php";
 
     $.ajax({
@@ -178,14 +202,14 @@ $(function () {
         cma_id: cmaIDNumber,
       },
       success: function (res) {
-        console.log("res::", JSON.stringify(res));
+        console.currentPage.log("res::", JSON.stringify(res));
       },
     });
   });
 
   $("#mls_helper_first_criteria").on("click", async (e) => {
-    console.log(e);
-    console.log("first clicked");
+    console.currentPage.log(e);
+    console.currentPage.log("first clicked");
     let highPrice = $("#f_5_High__1-2-3-4-5");
     let lowPrice = $("#f_5_Low__1-2-3-4-5");
     let lowPrice2 = $("#f_5_Low_1__1-2-3-4-5");
@@ -222,18 +246,11 @@ $(function () {
           x: highPriceInitial,
           y: iCount,
         });
-        console.log(
+        console.currentPage.log(
           `LowPrice: ${lowPrice.val()} - HighPrice: ${highPriceInitial}`,
           " | Count: ",
           iCount
         );
-        // if (points.length === 2) {
-        //   let y_for_1500 = 1500.00;
-        //   let x_for_1500 = (y_for_1500 - points[1].y) * (points[0].x - points[1].x) / (points[0].y - points[1].y) + points[1].x;
-        //   console.log(x_for_1500);
-        //   highPriceInitial = Math.floor(x_for_1500 / 10) * 10;
-        //   continue;
-        // }
         switch (true) {
           case iCount < 200:
             iTestControl[0]++;
@@ -282,18 +299,18 @@ $(function () {
 
     $(".CountBtn").removeAttr("disable");
     $(".SearchBtn").removeAttr("disable");
-    console.log(inputCountResult.val());
-    console.log(iCount);
+    console.currentPage.log(inputCountResult.val());
+    console.currentPage.log(iCount);
 
     nextLowPrice = highPrice.val();
     priceRange = parseInt(highPrice.val() || 0);
     listingCount = iCount;
 
-    console.log(curve);
+    console.currentPage.log(curve);
   }); //mls_helper_first_criteria
 
   $("#mls_helper_price_curve").on("click", async (e) => {
-    console.log("curve clicked");
+    console.currentPage.log("curve clicked");
     let highPrice = $("#f_5_High__1-2-3-4-5");
     let lowPrice = $("#f_5_Low__1-2-3-4-5");
     let lowPrice2 = $("#f_5_Low_1__1-2-3-4-5");
@@ -321,14 +338,14 @@ $(function () {
         lastCount = true;
         $(".CountBtn").removeAttr("disable");
         $(".SearchBtn").removeAttr("disable");
-        console.log(inputCountResult.val());
-        console.log(iCount);
+        console.currentPage.log(inputCountResult.val());
+        console.currentPage.log(iCount);
 
         priceRange = 99999;
         listingCount = iCount;
         curve.priceRange.push(priceRange);
         curve.listingCount.push(listingCount);
-        console.log(curve);
+        console.currentPage.log(curve);
         break;
       } else {
         console.group();
@@ -341,7 +358,7 @@ $(function () {
           highPrice.val(highPriceInitial);
           iCount = await $.focusFx.searchFormCount();
           iCount = parseInt(iCount);
-          console.log(
+          console.currentPage.log(
             `LowPrice: ${lowPrice.val()} - HighPrice: ${highPriceInitial}`,
             " | Count: ",
             iCount
@@ -387,8 +404,8 @@ $(function () {
             default:
               $(".CountBtn").removeAttr("disable");
               $(".SearchBtn").removeAttr("disable");
-              console.log(inputCountResult.val());
-              console.log(iCount);
+              console.currentPage.log(inputCountResult.val());
+              console.currentPage.log(iCount);
 
               priceRange = parseInt(highPrice.val() || 0);
               listingCount = iCount;
@@ -404,8 +421,8 @@ $(function () {
   });
 
   $("#mls_helper_next_criteria").on("click", async (e) => {
-    console.log(e);
-    console.log("next clicked");
+    console.currentPage.log(e);
+    console.currentPage.log("next clicked");
     let highPrice = $("#f_5_High__1-2-3-4-5");
     let lowPrice = $("#f_5_Low__1-2-3-4-5");
     let lowPrice2 = $("#f_5_Low_1__1-2-3-4-5");
@@ -424,116 +441,6 @@ $(function () {
     iCount = await $.focusFx.searchFormCount();
     iCount = parseInt(iCount);
   }); //id: mls_helper_next_criteria
-
-  // $("#mls_helper_price_curve").on("click", async (e) => {
-  //   console.log('curve clicked');
-  //   let highPrice = $("#f_5_High__1-2-3-4-5");
-  //   let lowPrice = $("#f_5_Low__1-2-3-4-5");
-  //   let lowPrice2 = $("#f_5_Low_1__1-2-3-4-5");
-  //   lowPrice2.val('001');
-  //   let newHighPrice, oldHighPrice, oldLowPrice;
-  //   let countAccumulate, countTotal;
-  //   let lastCount = false;
-  //   let iCount = 0;
-  //   let iLoop = 0;
-  //   console.group();
-  //   // Scatter Curve
-  //   // do {
-  //   //   iLoop++;
-  //   //   newHighPrice = parseInt(parseInt(highPrice.val()) + 200);
-  //   //   highPrice.val(newHighPrice);
-  //   //   iCount = await $.focusFx.searchFormCount();
-  //   //   iCount = parseInt(iCount);
-  //   //   curve.priceRange.push(newHighPrice);
-  //   //   curve.listingCount.push(iCount);
-  //   //   console.log("Price Point: ", newHighPrice);
-  //   //   console.log("Listing Count: ", iCount);
-  //   // } while (iLoop <= 100)
-  //   // Distribution Curve
-  //   lowPrice.val(0);
-  //   highPrice.val(0);
-
-  //   let priceIncrements = [140, 160, 180, 200, 220, 500, 1500, 2000, 2500];
-  //   let priceIncrementRegularPointer = 3; // try 200
-  //   let priceIncrementPointer = priceIncrementRegularPointer;
-  //   lowPrice.val();
-  //   highPrice.val();
-  //   // get the total listing Count:
-  //   countTotal = parseInt(await $.focusFx.searchFormCount());
-
-  //   do {
-  //     try {
-  //       oldLowPrice = lowPrice.val(); // save the old low price
-  //       lowPrice.val(highPrice.val());
-  //       oldHighPrice = highPrice.val(); // save the old high price
-  //       if (priceIncrementPointer >= 0 && priceIncrementPointer < priceIncrements.length) {
-  //         newHighPrice = parseInt(highPrice.val()) + priceIncrements[priceIncrementPointer]; // try 200
-  //       } else if (priceIncrementPointer >= priceIncrements.length) {
-  //         newHighPrice = null;
-  //         lastCount = true;
-  //       } else {
-  //         newHighPrice -= 20;
-  //       }
-  //       highPrice.val(newHighPrice);
-  //       iCount = await $.focusFx.searchFormCount();
-  //       iCount = parseInt(iCount);
-  //       if (iCount >= 1200 && iCount <= 1500) {
-  //         iLoop++;
-  //         curve.priceRange.push(newHighPrice);
-  //         curve.listingCount.push(iCount);
-  //         console.log("Price Point: ", newHighPrice);
-  //         console.log("Listing Count: ", iCount);
-  //         // sum up the accumulated count:
-  //         countAccumulate = curve.listingCount.reduce((sum, a) => sum + a, 0);
-  //         if (countTotal - countAccumulate <= 1500) {
-  //           lastCount = true;
-  //         }
-  //         priceIncrementPointer = priceIncrementRegularPointer; // reset the Pointer
-  //       } else {
-  //         throw iCount;
-  //       }
-  //     } catch (e) {
-  //       console.log(e);
-  //       iCount = parseInt(e);
-  //       lowPrice.val(oldLowPrice); // restore the old low price;
-  //       highPrice.val(oldHighPrice); // restore the old high price;
-  //       switch (true) {
-  //         case iCount < 200:
-  //           priceIncrementPointer += 4;
-  //           break;
-  //         case iCount >= 200 && iCount < 500:
-  //           priceIncrementPointer += 3;
-  //           break;
-  //         case iCount >= 500 && iCount < 1000:
-  //           priceIncrementPointer += 2;
-  //           break;
-  //         case iCount >= 1000 && iCount < 1200:
-  //           priceIncrementPointer += 1;
-  //           break;
-  //         case iCount > 1500:
-  //           // priceIncrement is too big, try a smaller increment
-  //           priceIncrementPointer--;
-  //           break;
-  //       }
-  //     }
-  //   } while (iLoop <= 100 && !lastCount)
-  //   console.groupEnd();
-  //   $(".CountBtn").removeAttr('disable');
-  //   $('.SearchBtn').removeAttr('disable');
-  //   console.log('Price Distribution Curve: ', curve);
-  // }); //id: mls_helper_next_criteria
-
-  // $(".CountResultText").bind("input propertychange", (e) => {
-  //   console.log('CountResult Changed');
-  // });
-
-  // $("#CountResult").on("change", () => {
-  //   console.log('input result changed');
-  // });
-
-  // divCountSearch.on("change", () => {
-  //   console.log("count search changed!");
-  // });
 
   // Select the node that will be observed for mutations
   // const targetNode = document.getElementById('CountResult');
@@ -554,13 +461,13 @@ $(function () {
     // Use traditional 'for loops' for IE 11
     for (const mutation of mutationsList) {
       if (mutation.type === "childList") {
-        console.log("A child node has been added or removed.");
+        console.currentPage.log("A child node has been added or removed.");
       } else if (mutation.type === "attributes") {
-        console.log(
+        console.currentPage.log(
           "The " + mutation.attributeName + " attribute was modified."
         );
-        console.log("The oldValue is " + mutation.oldValue);
-        console.log($("#CountResult").val());
+        console.currentPage.log("The oldValue is " + mutation.oldValue);
+        console.currentPage.log($("#CountResult").val());
         let iCount = parseInt($("#CountResult").val());
       }
     }
@@ -579,4 +486,4 @@ $(function () {
 
   // Click Search Button, jump to search results
   // btnSearch.click();
-});
+}

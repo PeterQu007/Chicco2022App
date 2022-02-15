@@ -1,7 +1,32 @@
-//define the paragon mls Main Menu Class
-//store the frequently used menu function links in the class
+/** //add 模块说明 | 针对的网页元素 TOP MENU BAR
+ * 定义顶层菜单按键功能和选项
+ * | //ADD 针对的网页元素是 TOP MENU BAR
+ * define the paragon mls Main Menu Class
+ * store the frequently used menu function links in the class
+ */
 
 var $fx = L$();
+
+(async function () {
+  /// 设定调试输出模式
+  let debugSettingInfo = await chrome.runtime.promise.sendMessage({
+    debugID: "debug_main_menu",
+    from: "MainMenu.js",
+    todo: "readDebugSetting",
+  });
+  let debugSetting = debugSettingInfo.data.value;
+  console.currentPage = {
+    log: debugSetting ? console.log : () => {},
+    logAlways: console.log,
+    logDebug: (tag, pageName) => {
+      if (!debugSetting) {
+        console.log(`(${tag} DISABLED: ) ${pageName} ()`);
+      }
+    },
+  };
+
+  console.currentPage.logDebug("Debug", "MainMenu.js");
+})();
 
 class MainMenu {
   constructor() {
@@ -12,18 +37,23 @@ class MainMenu {
     this.appMainMenu = $("#app_banner_menu");
 
     //Add Subject Loading form
-
     this.formLoadSubject = $(
-      `<form class="languagebox" name='pid_load_subjects' style="display:block"></form>`
+      `<form class="languagebox" name='pid_load_subjects' style="display:block" title="Main Menu Functions Panel"></form>`
     );
 
     //Add Subject Load Button
     this.btnSubjectProperty = $(`<div class="languagebox"> 
-                  <input type = "button" id="SubjectPropertySubmit" value="LoadSubject">
+                  <input type = "button" id="SubjectPropertySubmit" value="LoadSubj" title="Load Subjects">
                   </div>`);
     this.formLoadSubject.append(this.btnSubjectProperty);
 
-    //insert remote/local radio
+    //Add Subject Set Button
+    this.btnSetSubjectProperty = $(`<div class="languagebox"> 
+                  <input type = "button" id="SetSubjectProperty" value="SetSubj" title="Set Subject">
+                  </div>`);
+    this.formLoadSubject.append(this.btnSetSubjectProperty);
+
+    //Add remote/local radio
     this.radioSubjectLoadingLink = $(`<div class = "languagebox">
         <span class="mls-vertial-divider">|</span>
         <input type="radio" class = "pid_subject_property_options" id='pid_local' name="LoadSubjects" value="local" />
@@ -35,9 +65,7 @@ class MainMenu {
       </div>`);
     this.formLoadSubject.append(this.radioSubjectLoadingLink);
 
-    //insert vertial divider
-
-    //insert Subject Setting Button
+    //Add Subject Select Box
     this.selectSubjectProperty = $(`<div class="languagebox">
                                 <select id="SubjectProperty" name="SubjectProperty" >
                                 <option value = "205">205<option>
@@ -45,10 +73,9 @@ class MainMenu {
                                 </select>
                                 </div>`);
     this.formLoadSubject.append(this.selectSubjectProperty);
-    // this.selectSubjectProperty.insertAfter(this.appLeftBanner);
     this.txtSubjectAddress = document.getElementById("SubjectProperty");
 
-    //insert update current subject checkbox
+    //Add update current subject checkbox
     this.chkUpdateSubject = $(`<div class="languagebox">
                                 <div id="checkUpdateSubjectInfoWrapper">
                                     <label>Update Sub</label>
@@ -57,7 +84,7 @@ class MainMenu {
                             </div>`);
     this.formLoadSubject.append(this.chkUpdateSubject);
 
-    //insert CMA/VPR options
+    //Add CMA/VPR options
     this.selectCMAType = $(`<div class="languagebox">
                                 <select id="SelectCMAType" name="SelectCMAType" >
                                 <option value = "CMA">CMA<option>
@@ -67,14 +94,51 @@ class MainMenu {
                                 </div>`);
     this.formLoadSubject.append(this.selectCMAType);
 
+    //Add Client Select Box
+    this.selectClients = $(`<div class="languagebox">
+                                <select id="RealtyClients" name="RealtyClients" title="Select Clients">
+                                <option value = "client1">client1<option>
+                                <option value = "client2">client2<option>
+                                </select>
+                                </div>`);
+    this.formLoadSubject.append(this.selectClients);
+
+    //Add Client Showing / Tour Box
+    this.selectShowingLists = $(`<div class="languagebox">
+                                <select id="RealtyClientShowingLists" name="RealtyClientShowingLists" title="Client Showing/CMA Listings">
+                                <option value = "list1">list1<option>
+                                <option value = "list2">list2<option>
+                                </select>
+                                </div>`);
+    this.formLoadSubject.append(this.selectShowingLists);
+
+    //Add Load Debug Settings Button
+    this.btnLoadDebugSettings = $(`<div class="languagebox"> 
+                  <input type = "button" id="LoadDebugSettings" value="<D>" title="Load Debug Settings">
+                  </div>`);
+    this.formLoadSubject.append(this.btnLoadDebugSettings);
+
+    //Add Debug Settings Selector
+    this.selectDebugSettings = $(`<div class="languagebox">
+                                <select id="DebugSettings" name="DebugSettings" >
+                                <option value = "1">HomePage<option>
+                                <option value = "1">MainMenu<option>
+                                </select>
+                                </div>`);
+    this.formLoadSubject.append(this.selectDebugSettings);
+
     //insert form to the banner
     this.formLoadSubject.insertAfter(this.appLeftBanner);
     this.subjectPropertyOptions = document.getElementsByClassName(
       "pid_subject_property_options"
     );
-    this.btnLoadSubject = document.getElementById("SubjectPropertySubmit");
 
-    //lock the map size
+    //Add 必须读取DOM元素, 才能触发click事件
+    this.btnLoadSubject = document.getElementById("SubjectPropertySubmit");
+    this.btnSetSubjectProperty = document.getElementById("SetSubjectProperty");
+    this.btnLoadDebugSettings = document.getElementById("LoadDebugSettings");
+
+    //Add Checkbox lock the map size
     (this.chkShowSmallMap = $(`<div class="languagebox">
                                 <div id="checkShowSmallMapWrapper">
                                 <span class="mls-vertial-divider">|</span>
@@ -84,7 +148,7 @@ class MainMenu {
                             </div>`)),
       this.chkShowSmallMap.insertAfter(this.appLeftBanner);
 
-    //lock the map type
+    //Add checkBox lock the map type
     (this.chkLockRoadMapType = $(`<div class="languagebox">
                                 <div id="checkLockMapTypeWrapper">
                                     <label>Lock Road Map Type</label>
@@ -123,18 +187,27 @@ class MainMenu {
     this.listingCarts = $(
       'a[url="/ParagonLS/Search/Property.mvc/ListingCarts/0?searchType=4"]'
     );
-    //console.info('New Main Menu Class works!');
 
-    //add the tabs object to Main Menu.
-    //this.tabs = new Tabs();
+    /// 加载调试参数
+    this.LoadDebugSettings();
+
+    /// 添加事件句柄
     this.events();
   }
 
+  /// 添加事件句柄
   events() {
     //todo::
     this.btnLoadSubject.addEventListener("click", () =>
       this.loadSubjectProperties()
     );
+    this.btnSetSubjectProperty.addEventListener("click", () => {
+      console.currentPage.log("click set subject button");
+    });
+    this.btnLoadDebugSettings.addEventListener("click", () => {
+      console.log("load debug settings");
+      this.LoadDebugSettings();
+    });
     var rad = this.subjectPropertyOptions;
     for (var i = 0; i < rad.length; i++) {
       rad[i].addEventListener("change", (e) => {
@@ -143,14 +216,16 @@ class MainMenu {
     }
   }
 
+  /// 方法
+
   showLargeMap() {
-    console.log("large map clicked");
+    console.currentPage.log("large map clicked");
     var x = $("iframe");
-    console.log(x);
+    console.currentPage.log(x);
     var y = x.contents();
     var z = y.find("#divMap");
 
-    console.log(z);
+    console.currentPage.log(z);
   }
 
   openTaxSearch() {
@@ -166,19 +241,11 @@ class MainMenu {
   }
 
   loadSubjectProperties() {
+    /// 功能说明: 加载Subject物业列表
     var address = "TEST";
     var id = "1234";
     var urlOption = document.getElementById("pid_local").checked;
     var ajax_url = "";
-    if (urlOption) {
-      // ajax_url =
-      //   "http://localhost/pidrealty4/wp-content/themes/realhomes-child-3/db/loadSubjectData.php";
-      ajax_url =
-        "https://pidrealty4.local/wp-content/themes/realhomes-child-3/db/loadSubjectData.php";
-    } else {
-      ajax_url =
-        "https://pidhomes.ca/wp-content/themes/realhomes-child-3/db/loadSubjectData.php";
-    }
 
     ajax_url = $fx.getPIDAjaxUrl() + "loadSubjectData.php";
 
@@ -191,7 +258,7 @@ class MainMenu {
       },
       dataType: "json",
       success: function (res) {
-        console.log("res", res);
+        console.currentPage.log("res", res);
         var subjectProperties = res;
         var htmlSelect = document.getElementById("SubjectProperty");
         //clear old optionis in the htmlSelect
@@ -204,7 +271,9 @@ class MainMenu {
         let option;
         let subjectAddress;
         let unitNo;
-        //SELECT Subject_Address, Unit_No, City, Neighborhood FROM wp_pid_cma_subjects WHERE CMA_ACTION=1
+
+        /// 向选择框内装载数据
+        /// 设定当前的选项为最新的记录
         for (var i = 0; i < subjectProperties.length; i++) {
           let tempUnitNo = subjectProperties[i].Unit_No;
           tempUnitNo = tempUnitNo ? tempUnitNo : "";
@@ -212,11 +281,11 @@ class MainMenu {
           unitNo = tempUnitNo == "" ? "" : "#" + tempUnitNo + " ";
 
           subjectAddress =
-            unitNo +
-            subjectProperties[i].Subject_Address.trim() +
-            "[" +
+            "<" +
             subjectProperties[i].ID +
-            "]";
+            ">" +
+            unitNo +
+            subjectProperties[i].Subject_Address.trim();
           option = document.createElement("option");
           option.text = subjectAddress;
           option.value = subjectAddress;
@@ -233,8 +302,43 @@ class MainMenu {
           );
           htmlSelect.add(option);
         }
-        // $('input[name="textbox"]').val(JSON.stringify(res));
+
+        /// 设定当前的记录
+        document
+          .getElementById("SubjectProperty")
+          .getElementsByTagName("option")[1].selected = "selected";
       },
+    });
+  }
+
+  async LoadDebugSettings() {
+    /// 功能说明: 从CouchDB中读取debug设定参数
+    /// 加载到选择框里面
+
+    let debugOptions = {
+      from: "MainMenu",
+      todo: "loadDebugSettings",
+    };
+
+    let debugInfos = await chrome.runtime.promise.sendMessage(debugOptions);
+    let debugSettings = debugInfos.data;
+
+    console.log(debugSettings);
+
+    let htmlSelect = document.getElementById("DebugSettings");
+    htmlSelect.length = 0; // 清除旧的元素
+    let defaultOption = document.createElement("option");
+    defaultOption.text = "All Debug Settings";
+
+    htmlSelect.add(defaultOption);
+    htmlSelect.selectedIndex = 0;
+    let option;
+
+    debugSettings.map((setting) => {
+      option = document.createElement("option");
+      option.text = setting._id;
+      option.value = setting.value;
+      htmlSelect.add(option);
     });
   }
 }

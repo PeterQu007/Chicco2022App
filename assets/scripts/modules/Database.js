@@ -34,6 +34,13 @@ class Database {
     // this.dbExposure.logIn("admin", "escape88", (res) => {
     //   console.log(res);
     // });
+    this.dbDebug = new PouchDB(
+      "http://admin:escape88@localhost:5984/debugsettings",
+      {
+        skip_setup: true,
+      }
+    );
+
     this.dbListing = new PouchDB(
       "http://admin:escape88@localhost:5984/listing",
       {
@@ -462,6 +469,34 @@ class Database {
           });
       });
     //console.groupEnd('>>>writeComplex');
+  }
+
+  /// 调取调试设定
+  async readDebugSetting(debugID) {
+    let resInfo = null;
+    try {
+      let debugSetting = await this.dbDebug.get(debugID);
+      return Promise.resolve(debugSetting);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  async loadDebugSettings() {
+    const query = {
+      selector: {
+        _id: {
+          $gt: null,
+        },
+      },
+    };
+    try {
+      let resultInfos = await this.dbDebug.allDocs({ include_docs: true });
+      let debugSettings = resultInfos.rows.map((row) => row.doc);
+      return Promise.resolve(debugSettings);
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   readListing(listingInfo, callback) {

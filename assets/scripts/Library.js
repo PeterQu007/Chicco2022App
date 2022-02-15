@@ -868,6 +868,39 @@
         d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
       return $today;
     },
+
+    setDebugMode: function (debugID) {
+      /// 设定调试输出模式
+      let debugSetting = getDebugSetting(debugID);
+      console.currentPage = {
+        log: debugSetting ? console.log : () => {},
+        logAlways: console.log,
+        logDebug: (tag, pageName) => {
+          if (!debugSetting) {
+            console.log(`(${tag} DISABLED: ) ${pageName} ()`);
+          }
+        },
+      };
+
+      function getDebugSetting(debugID) {
+        let htmlDebugSettings = top.document.getElementById("DebugSettings");
+        let debugSettings = htmlDebugSettings.options;
+        var options = debugSettings.options;
+        for (var i = 0; i < options.length; i++) {
+          var option = options[i];
+          var optionText = option.text;
+          var lowerOptionText = optionText.toLowerCase();
+          var lowerText = debugID.toLowerCase();
+          var regex = new RegExp("^" + debugID, "i");
+          var match = optionText.match(regex);
+          var contains = lowerOptionText.indexOf(lowerText) != -1;
+          if (match || contains) {
+            option.selected = true;
+            return option.value;
+          }
+        }
+      }
+    },
   };
 
   Library.init = function (houseType) {

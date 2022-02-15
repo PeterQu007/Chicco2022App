@@ -1,8 +1,12 @@
-//Class Wrapper mainNavBar for Top Level Tabs Container - Main Navigation Bar(mainNav)
-//Top Level Tabs Container(mainNavBar) is an HTML Elements ul Complex inside top level URL:
-//https://bcres.paragonrels.com/ParagonLS/Default.mvc#2
-//mainNavBar contains mainNavItem - individual topTab ui Complexes
-//sub Class Wrapper mainNavItem for topTab ui Complex
+/** //Add  模块功能说明 | 针对的网页元素是: TOP TAB BAR
+ * 增加顶层tabs的控制功能 例如 Home, British Columbia, Listing Carts, Save Property Searches, Detached Residential
+ * | //Add 针对的网页元素是: TOP TAB BAR
+ * Class Wrapper mainNavBar for Top Level Tabs Container - Main Navigation Bar(mainNav)
+ * Top Level Tabs Container(mainNavBar) is an HTML Elements ul Complex inside top level URL:
+ * https://bcres.paragonrels.com/ParagonLS/Default.mvc#2
+ * mainNavBar contains mainNavItem - individual topTab ui Complexes
+ * sub Class Wrapper mainNavItem for topTab ui Complex
+ */
 
 const mainPanelID = "div#app_tab_switcher"; //Top Level Panel Container of TopTab mainNav & subContent Selector ID
 const mainNavBarID = "ul#tab-bg"; //Top Tabs Main Navigation Selector ID
@@ -11,15 +15,27 @@ const mainNavItemClass = "li.ui-state-default.ui-corner-top"; //Top Tab li eleme
 const activeNavItemClass = "ui-tabs-selected ui-state-active"; //Current Active Top Tab Selector Class
 const subContentPanelClass = ".ui-tabs-panel"; //tab content panel class
 
-//const savedPropertySearches = 'iframe#tab2';
+async function setDebugMode() {
+  /// 设定调试输出模式
+  let debugSettingInfo = await chrome.runtime.promise.sendMessage({
+    debugID: "debug_main_nav_bar", /// 保存在DouchDB debugsettings表格中
+    from: "MainNavBar.js",
+    todo: "readDebugSetting",
+  });
+  let debugSetting = debugSettingInfo.data.value;
+  console.currentPage = {
+    log: debugSetting ? console.log : () => {},
+    logAlways: console.log,
+    logDebug: (tag, pageName) => {
+      if (!debugSetting) {
+        console.log(`(${tag} DISABLED: ) ${pageName} ()`);
+      }
+    },
+    warn: debugSetting ? console.warn : () => {},
+  };
 
-// export class MainTabSwitcher {
-//     constructor(){
-//         this.$mainTabSwitcher = $(mainPanelID);
-//         this.$mainNavBar = $(mainNavBarID);
-
-//     }
-// }
+  console.currentPage.logDebug("Debug", "MainNavBar.js");
+}
 
 class MainNavBar {
   constructor() {
@@ -52,9 +68,9 @@ class MainNavBar {
         $navItem.parent().attr("id") == "tab-bg"
       ) {
         let newNavItemID = $navItem.children("a").attr("href"); //get tabID
-        let newNavItem = new mainNavItem($navItem);
+        let newNavItem = new MainNavItem($navItem);
         newNavItem.parent = self;
-        console.warn(
+        console.currentPage.warn(
           "[Class.TopTabs]onAddNewTab===>New Tab added, newTabID:",
           newNavItemID,
           $navItem,
@@ -77,7 +93,7 @@ class MainNavBar {
       let $tabContent = $(this);
       //if added $tab is the top tab, then update the topTabInfos:
       //if(self.EnableOnAddNewTab && $tab.parent().attr('id')=="tab-bg") {
-      //console.warn('Class.TopTabs.onAddNewTabContent===>New TabContent added', $tabContent, $tabContent.parent().attr('id'));
+      //console.currentPage.warn('Class.TopTabs.onAddNewTabContent===>New TabContent added', $tabContent, $tabContent.parent().attr('id'));
       //    self.updateTopTabInfos();
       //}
       if (
@@ -87,9 +103,9 @@ class MainNavBar {
         self.$subContentPanels.push(this);
       }
       // chrome.storage.local.get('showTabQuickSearch',function(result){
-      //     //console.log('Class.TopTabs.onAddNewTabContent::get showTabQuickSearch:', result.showTabQuickSearch);
+      //     //console.currentPage.log('Class.TopTabs.onAddNewTabContent::get showTabQuickSearch:', result.showTabQuickSearch);
       //     self.mainNavItems.forEach(function(mainNavItem){
-      //         //console.log('tabInfo.tabTitle:', tabInfo.tabTitle)
+      //         //console.currentPage.log('tabInfo.tabTitle:', tabInfo.tabTitle)
       //         if(mainNavItem.tabTitle == 'Quick Search'){
       //             mainNavItem.deactivate();
       //         }
@@ -116,7 +132,7 @@ class MainNavBar {
     this.$mainNavItems = this.$mainNavBar.children(mainNavItemClass); //set of top tab items for navigation
     //populate the mainNavItems
     this.$mainNavItems.each(function (index) {
-      let navItem = new mainNavItem($(this)); //convert each top tab element to mainNavItem Class
+      let navItem = new MainNavItem($(this)); //convert each top tab element to mainNavItem Class
       navItem.parent = self;
       self.mainNavItems.push(navItem); //
       if (navItem.active) {
@@ -165,9 +181,9 @@ class MainNavBar {
       }
     });
 
-    console.log("main Nav Bar updated!");
-    console.log("active nav item is: ", self.curNavItem.Title);
-    console.log("locked Nav Item is: ", self.lockedNavItem.Title);
+    console.currentPage.log("main Nav Bar updated!");
+    console.currentPage.log("active nav item is: ", self.curNavItem.Title);
+    console.currentPage.log("locked Nav Item is: ", self.lockedNavItem.Title);
   }
 
   removeNavItem(tabID) {
@@ -222,7 +238,7 @@ class MainNavBar {
   }
 }
 
-class mainNavItem {
+class MainNavItem {
   //Class Wrapper of a top level tab ui complex, as Main Nav Item inside Main Nav Bar
   //parameter $navItem : Top Level Tab Element of HTML li
   constructor($navItem) {
@@ -259,7 +275,12 @@ class mainNavItem {
     let self = this;
     //jquery add click event to anchor element a
     this.$contentLink.on("click", function () {
-      console.log("click top tab Link: ", self.Title, " ", self.tabID);
+      console.currentPage.log(
+        "click top tab Link: ",
+        self.Title,
+        " ",
+        self.tabID
+      );
       self.clicked = true;
 
       if (self.tabID != "#HomeTab") {
@@ -271,7 +292,11 @@ class mainNavItem {
         self.$me.hasClass("ui-state-active")
       ) {
         self.active = true;
-        console.log(self.Title, self.tabID, " is active and selected");
+        console.currentPage.log(
+          self.Title,
+          self.tabID,
+          " is active and selected"
+        );
       }
       var removeSubPanelStyle = true;
       self.parent.update(removeSubPanelStyle);
@@ -282,7 +307,7 @@ class mainNavItem {
     let self = this;
 
     this.$closeLink.on("click", function () {
-      console.log("close a tab", self.tabID);
+      console.currentPage.log("close a tab", self.tabID);
       self.parent.removeNavItem(self.tabID);
       self.parent.update();
     });
@@ -313,14 +338,22 @@ class mainNavItem {
   activate() {
     //activate this nav item, show the nav item content
     this.$me.addClass(activeNavItemClass);
-    console.log("ActivateThisTab, title, id:", this.Title, this.tabID);
+    console.currentPage.log(
+      "ActivateThisTab, title, id:",
+      this.Title,
+      this.tabID
+    );
     this.$tabContent.removeClass("ui-tabs-hide");
   }
 
   deactivate() {
     //deactivate this nav item, hide the nav item content
     this.$me.removeClass(activeNavItemClass);
-    console.log("DeactivateThisTab, title, id:", this.Title, this.tabID);
+    console.currentPage.log(
+      "DeactivateThisTab, title, id:",
+      this.Title,
+      this.tabID
+    );
     if (this.Title != "Home") {
       this.$tabContent.removeAttr("style");
     }

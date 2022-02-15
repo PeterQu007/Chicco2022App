@@ -573,19 +573,52 @@ var fullRealtor = {
     });
   },
 
-  updateComplexInfo: function () {
+  updateComplexInfo: async function () {
     var self = this;
-    var $inputName = $("#inputComplexName");
-    var compName = "";
+    let $inputName = $("#inputComplexName");
+    let compName = "";
+    let complexID = null;
 
-    chrome.storage.local.get("complexName", function (result) {
-      if (result) {
-        compName = $fx.normalizeComplexName(result.complexName);
-        self.complexName.text(compName);
-        self.complexOrSubdivision.text(compName);
-        $inputName.val(compName);
-      }
+    let addressSelect = "";
+    let isFormalAddress = true;
+    if (
+      typeof self.formalAddress.text() == "string" &&
+      self.formalAddress.text().length > 0
+    ) {
+      addressSelect = self.formalAddress.text();
+    } else {
+      addressSelect = self.address.text();
+      isFormalAddress = false;
+    }
+
+    if (!complexID) {
+      var address = new AddressInfo(
+        addressSelect,
+        self.houseListingType,
+        isFormalAddress
+      );
+      let strataPlan = self.strataPlan;
+      complexID = strataPlan + address.addressID;
+    }
+
+    // chrome.storage.local.get("complexName", function (result) {
+    //   if (result) {
+    //     compName = $fx.normalizeComplexName(result.complexName);
+    //     self.complexName.text(compName);
+    //     self.complexOrSubdivision.text(compName);
+    //     $inputName.val(compName);
+    //   }
+    // });
+
+    let resInfo = await chrome.runtime.promise.sendMessage({
+      todo: "searchComplexInfo",
+      from: "mls-fullRealtor.js",
+      complexID: complexID,
     });
+    compName = $fx.normalizeComplexName(resInfo.complexName);
+    self.complexName.text(compName);
+    self.complexOrSubdivision.text(compName);
+    $inputName.val(compName);
   },
 
   addExposureInfo: function (exposure) {
@@ -653,6 +686,7 @@ var fullRealtor = {
     this.valueChangePercent = $("#valueChangePercent");
     this.oldTimerLotValuePerSF = $("#oldTimerLotValuePerSF");
     this.marketValuePerSF = $("#marketValuePerSF");
+    this.currentTaxAssessYear = $("#currentTaxAssessYear");
   },
 
   addRemarks: function () {
@@ -791,6 +825,7 @@ var fullRealtor = {
         console.log(searchResult.msg);
         console.log(searchResult.data); /// assessInfo
         self.updateAssess(searchResult.data);
+        self.updateComplexInfo();
       }
     } catch (err) {}
   },
@@ -1022,6 +1057,7 @@ var fullRealtor = {
         "bcaDataUpdateDate",
         "planNum",
         "dataFromDB",
+        "taxYear",
       ]);
     }
 
@@ -1085,6 +1121,7 @@ var fullRealtor = {
     var marketLotValuePerSF = "";
     var marketHouseValuePerSF = "";
     var marketValuePerSF = "";
+    var currentTaxAssessYear = result.taxYear;
     var houseType = self.houseListingType;
     var dataFromDB = result.dataFromDB;
 
@@ -1199,6 +1236,7 @@ var fullRealtor = {
         $fx.convertStringToDecimal(lotAreaInSquareFeet, true)
       )
     );
+    self.currentTaxAssessYear.text("AssessYear: " + currentTaxAssessYear);
   },
 
   clearAssess: function () {
