@@ -34,6 +34,15 @@
   left: 770px;
 }
 
+#ui-extra-display {
+  border: 1px solid red;
+  width: 550px;
+  padding: 2px 5px;
+  position: absolute;
+  top: 50px;
+  left: 1000px;
+}
+
 .mapView {
   border: 1px solid red;
   width: 800px;

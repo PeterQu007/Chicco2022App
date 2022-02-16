@@ -26,7 +26,6 @@
       "./assets/scripts/modules/chrome-runtime-promise.js",
       "./background/searchTax.js",
       "./background/eventPage.js"
-      // "./temp/scripts/EventPage.js"
     ],
     "persistent": false
   },
@@ -120,7 +119,6 @@
         "./assets/lib/jquery/dist/jquery.min.js",
         "./assets/scripts/modules/chrome-storage-promise.js",
         "./assets/scripts/modules/chrome-runtime-promise.js",
-        // "./assets/scripts/modules/chrome-tabs-promise.js",
         "./content/TaxSearchDetails.js"
       ],
       "all_frames": true
@@ -139,15 +137,15 @@
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",
         "./assets/lib/underscore/underscore-min.js",
-        //"./temp/scripts/CountSearch.js",
         "./temp/scripts/CountBody1-jquery.js",
         "./temp/scripts/CountBody2-Modulejs.js",
         "./temp/scripts/CountBody3-SearchCriteriajs.js",
         "./assets/scripts/Library.js",
         "./assets/scripts/modules/chrome-storage-promise.js",
         "./assets/scripts/modules/chrome-runtime-promise.js",
-        "./content/BypassListingSearchCriteria.js"
+        "./content/ListingSearchCriteria.js"
       ],
+      "css": ["./temp/content.css"],
       "all_frames": true
     },
     //////Tab3_?_2: Listing Search Results Report By different Views:

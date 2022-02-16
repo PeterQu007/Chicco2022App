@@ -869,34 +869,37 @@
       return $today;
     },
 
-    setDebugMode: function (debugID) {
+    setDebugMode: function (debugID, pageName) {
       /// 设定调试输出模式
       let debugSetting = getDebugSetting(debugID);
       console.currentPage = {
         log: debugSetting ? console.log : () => {},
         logAlways: console.log,
-        logDebug: (tag, pageName) => {
+        logDebugMode: (tag, pageName) => {
           if (!debugSetting) {
             console.log(`(${tag} DISABLED: ) ${pageName} ()`);
+          } else {
+            console.log(`(${tag} ENABLED: ) ${pageName} ()`);
           }
         },
       };
 
+      console.currentPage.logDebugMode("Debug", pageName);
+
       function getDebugSetting(debugID) {
         let htmlDebugSettings = top.document.getElementById("DebugSettings");
         let debugSettings = htmlDebugSettings.options;
-        var options = debugSettings.options;
-        for (var i = 0; i < options.length; i++) {
-          var option = options[i];
+        for (var i = 0; i < debugSettings.length; i++) {
+          var option = debugSettings[i];
           var optionText = option.text;
           var lowerOptionText = optionText.toLowerCase();
           var lowerText = debugID.toLowerCase();
-          var regex = new RegExp("^" + debugID, "i");
+          var regex = new RegExp("^<d>" + debugID, "i");
           var match = optionText.match(regex);
           var contains = lowerOptionText.indexOf(lowerText) != -1;
           if (match || contains) {
             option.selected = true;
-            return option.value;
+            return parseInt(option.value); // 转换成整数输出
           }
         }
       }

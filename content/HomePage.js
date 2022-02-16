@@ -2,7 +2,7 @@
 // inject to Paragon's Url: http://bcres.paragonrels.com/ParagonLS/Default.mvc*
 // the messages are passed between the defaultpage and iframes, all are the content scripts
 
-//import Tabs from '../assets/scripts/modules/mlsTabs';
+// import Tabs from '../assets/scripts/modules/mlsTabs';
 // import MainNavBar, {
 //   mainNavItem
 // } from "../assets/scripts/modules/MainNavBar";

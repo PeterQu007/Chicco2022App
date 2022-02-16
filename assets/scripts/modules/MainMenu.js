@@ -5,8 +5,6 @@
  * store the frequently used menu function links in the class
  */
 
-var $fx = L$();
-
 (async function () {
   /// 设定调试输出模式
   let debugSettingInfo = await chrome.runtime.promise.sendMessage({
@@ -247,7 +245,7 @@ class MainMenu {
     var urlOption = document.getElementById("pid_local").checked;
     var ajax_url = "";
 
-    ajax_url = $fx.getPIDAjaxUrl() + "loadSubjectData.php";
+    ajax_url = L$().getPIDAjaxUrl() + "loadSubjectData.php";
 
     $.ajax({
       url: ajax_url,
@@ -336,7 +334,7 @@ class MainMenu {
 
     debugSettings.map((setting) => {
       option = document.createElement("option");
-      option.text = setting._id;
+      option.text = `<${setting.value}>${setting._id}`;
       option.value = setting.value;
       htmlSelect.add(option);
     });
