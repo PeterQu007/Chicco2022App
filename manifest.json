@@ -132,7 +132,8 @@
       //Function: Bypass Listing Search Criteria Page, Jump to Search Results Page Spreadsheet View
       "run_at": "document_end",
       "matches": [
-        "https://bcres.paragonrels.com/ParagonLS/Search/Property.mvc/Index/*/?savedSearchID=*&searchID=tab*_*"
+        "https://bcres.paragonrels.com/ParagonLS/Search/Property.mvc/Index/*/?savedSearchID=*&searchID=tab*_*",
+        "https://bcres.paragonrels.com/ParagonLS/Search/Property.mvc/Index/*searchID=tab*_*"
       ],
       "js": [
         "./assets/lib/jquery/dist/jquery.min.js",

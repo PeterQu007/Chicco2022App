@@ -34,13 +34,57 @@
   left: 770px;
 }
 
-#ui-extra-display {
+.container-parameter-panels {
   border: 1px solid red;
-  width: 550px;
+  width: 1520px;
+  height: 35px;
   padding: 2px 5px;
   position: absolute;
-  top: 50px;
+  top: 20px;
   left: 1000px;
+  display: flex;
+  background-color: #f4f4f4;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vertical-line {
+  border-right: 2px solid black;
+  height: 15px;
+  width: 15px;
+}
+
+.container-price-dist-panels {
+  border: 1px solid red;
+  width: 1520px;
+  height: 1045px;
+  padding: 2px 5px;
+  position: absolute;
+  top: 65px;
+  left: 1000px;
+  display: flex;
+  background-color: #f4f4f4;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.ui-extra-display {
+  border: 1px solid blue;
+  width: 350px;
+  padding: 2px 5px;
+  margin: 5px;
+  /* position: absolute; */
+}
+
+.price-point {
+  width: 100px;
+  border: 1px solid blue;
+}
+
+.summary-point {
+  width: 40px;
+  border: 1px solid blue;
 }
 
 .mapView {
